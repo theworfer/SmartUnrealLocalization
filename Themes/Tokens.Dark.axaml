@@ -1,0 +1,100 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ════════ BACKGROUNDS — VS-style with subtle warmth ════════ -->
+    <SolidColorBrush x:Key="WindowBackground"     Color="#1E1E1E"/>
+    <SolidColorBrush x:Key="WindowBackgroundElev" Color="#232324"/>
+    <SolidColorBrush x:Key="ChromeBackground"     Color="#2D2D30"/>
+    <SolidColorBrush x:Key="ChromeBackground2"    Color="#333337"/>
+    <SolidColorBrush x:Key="PanelBackground"      Color="#252526"/>
+    <SolidColorBrush x:Key="PanelBackground2"     Color="#2A2A2D"/>
+    <SolidColorBrush x:Key="ActionBarBackground"  Color="#2D2D30"/>
+    <SolidColorBrush x:Key="StatusBarBackground"  Color="#1F1F20"/>
+    <SolidColorBrush x:Key="GridHeaderBackground" Color="#2D2D30"/>
+    <SolidColorBrush x:Key="GridBackground"       Color="#1E1E1E"/>
+    <SolidColorBrush x:Key="GridRowAltBackground" Color="#202021"/>
+    <SolidColorBrush x:Key="InputBackground"      Color="#1B1B1C"/>
+    <SolidColorBrush x:Key="MenuFlyoutBackground" Color="#252526"/>
+
+    <!-- ════════ BORDERS ════════ -->
+    <SolidColorBrush x:Key="BorderColor"   Color="#3F3F46"/>
+    <SolidColorBrush x:Key="BorderSubtle"  Color="#2D2D30"/>
+    <SolidColorBrush x:Key="BorderStrong"  Color="#55555A"/>
+    <!-- Faint header underline — a near-hairline (1px is the floor; this keeps the
+         contrast minimal so it reads as thin as the prototype's line). -->
+    <SolidColorBrush x:Key="GridHeaderUnderline" Color="#313135"/>
+
+    <!-- ════════ TEXT ════════ -->
+    <SolidColorBrush x:Key="TextPrimary"    Color="#DCDCDC"/>
+    <SolidColorBrush x:Key="TextSecondary"  Color="#B0B0B0"/>
+    <SolidColorBrush x:Key="TextMuted"      Color="#909090"/>
+    <SolidColorBrush x:Key="TextDim"        Color="#6A6A6A"/>
+    <SolidColorBrush x:Key="TextOnAccent"   Color="#FFFFFF"/>
+
+    <!-- ════════ ACCENT — VS blue ════════ -->
+    <SolidColorBrush x:Key="AccentColor"   Color="#2B8AE6"/>
+    <SolidColorBrush x:Key="AccentHover"   Color="#3A9AF2"/>
+    <SolidColorBrush x:Key="AccentMuted"   Color="#1F6FB0"/>
+    <SolidColorBrush x:Key="AccentSoft"    Color="#2D2B8AE6" Opacity="1"/>
+    <SolidColorBrush x:Key="AccentSoft2"   Color="#4D2B8AE6" Opacity="1"/>
+
+    <!-- ════════ STATES ════════ -->
+    <SolidColorBrush x:Key="HoverBackground"     Color="#FFFFFF" Opacity="0.05"/>
+    <SolidColorBrush x:Key="ActiveBackground"    Color="#FFFFFF" Opacity="0.08"/>
+
+    <!-- Window caption buttons (minimize / maximize; close keeps the system red).
+         The platform theme reads these three keys; without them its own hover was a
+         near-white block on the dark header. Height = the header's, so the hover
+         fills the bar instead of floating 3 px short of the top edge. -->
+    <SolidColorBrush x:Key="CaptionButtonBackground"  Color="#FFFFFF" Opacity="0.08"/>
+    <SolidColorBrush x:Key="CaptionButtonBorderBrush" Color="#FFFFFF" Opacity="0.13"/>
+    <SolidColorBrush x:Key="CaptionButtonForeground"  Color="#C8C8C8"/>
+    <x:Double x:Key="CaptionButtonHeight">36</x:Double>
+    <SolidColorBrush x:Key="SelectionBackground" Color="#2B8AE6" Opacity="0.18"/>
+    <SolidColorBrush x:Key="SelectionStrong"     Color="#2B8AE6" Opacity="0.32"/>
+    <SolidColorBrush x:Key="WindowButtonHover"   Color="#3E3E42"/>
+    <SolidColorBrush x:Key="CloseButtonHover"    Color="#E81123"/>
+
+    <!-- ════════ SEMANTIC ════════ -->
+    <SolidColorBrush x:Key="DangerColor"  Color="#F48771"/>
+    <SolidColorBrush x:Key="WarningColor" Color="#DCDCAA"/>
+    <SolidColorBrush x:Key="SuccessColor" Color="#4EC9B0"/>
+    <SolidColorBrush x:Key="InfoColor"    Color="#9CDCFE"/>
+
+    <!-- Severity marks on the status bar. The dark bar is near-black, so the
+         semantic colours themselves pass; see Tokens.Light for why the light
+         theme needs its own. ThemeContrastTests holds both. -->
+    <SolidColorBrush x:Key="StatusBarErrorMark"   Color="#F48771"/>
+    <SolidColorBrush x:Key="StatusBarWarningMark" Color="#DCDCAA"/>
+    <SolidColorBrush x:Key="StatusBarInfoMark"    Color="#9CDCFE"/>
+
+    <!-- ════════ CODE-EDITOR FEEL ════════ -->
+    <SolidColorBrush x:Key="KeyColor"     Color="#9CDCFE"/>
+
+    <!-- ════════ TAG PILLS (inline {tokens}) ════════ -->
+    <SolidColorBrush x:Key="TagFillColor" Color="#9CDCFE" Opacity="0.12"/>
+    <SolidColorBrush x:Key="TagTextColor" Color="#9CDCFE"/>
+    <SolidColorBrush x:Key="GridCheckUncheckedBackground" Color="#252526"/>
+    <SolidColorBrush x:Key="GridCheckUncheckedBorder" Color="#7A7A7A"/>
+    <SolidColorBrush x:Key="GridCheckCheckedBackground" Color="#2B8AE6"/>
+    <SolidColorBrush x:Key="GridCheckCheckedBorder" Color="#2B8AE6"/>
+    <SolidColorBrush x:Key="DataGridCellFocusVisualPrimaryBrush" Color="Transparent"/>
+    <SolidColorBrush x:Key="DataGridCellFocusVisualSecondaryBrush" Color="Transparent"/>
+    <SolidColorBrush x:Key="DataGridCurrencyVisualPrimaryBrush" Color="Transparent"/>
+
+    <!-- ════════ INLINE EDITOR HALO ════════ -->
+    <!-- BoxShadow shorthand: offsetX offsetY blur spread color. Mirrors the
+         prototype's `.cell-edit-input` 3 px accent-soft glow. -->
+    <BoxShadows x:Key="EditorGlow">0 0 0 3 #2D2B8AE6</BoxShadows>
+
+    <!-- ════════ GRADIENTS ════════ -->
+    <LinearGradientBrush x:Key="TitleBarGradient" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="#2F2F33"/>
+        <GradientStop Offset="1" Color="#28282B"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="StatusBarGradient" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="#1F1F20"/>
+        <GradientStop Offset="1" Color="#1A1A1B"/>
+    </LinearGradientBrush>
+
+</ResourceDictionary>

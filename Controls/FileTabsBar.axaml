@@ -1,0 +1,221 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:SmartUnrealLocalization.ViewModels"
+             xmlns:loc="using:SmartUnrealLocalization.Localization"
+             x:Class="SmartUnrealLocalization.Controls.FileTabsBar"
+             x:DataType="vm:MainWindowViewModel"
+             IsVisible="{Binding HasOpenTabs}">
+
+    <UserControl.Styles>
+        <!-- One tab (design spec: transparent until hover; active = accent outline,
+             4px all-corner radius, 26px tall). -->
+        <Style Selector="Border.fileTab">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="10,0,4,0"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="MinWidth" Value="80"/>
+            <Setter Property="MaxWidth" Value="200"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Border.fileTab:pointerover">
+            <Setter Property="Background" Value="{DynamicResource HoverBackground}"/>
+        </Style>
+        <Style Selector="Border.fileTab.active">
+            <Setter Property="Background" Value="{DynamicResource WindowBackgroundElev}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
+        </Style>
+
+        <!-- Chrome-like divider between tabs: visible only between two idle
+             inactive tabs — hidden while its own tab is hovered or active. -->
+        <Style Selector="Rectangle.tabSep">
+            <Setter Property="Fill" Value="{DynamicResource BorderStrong}"/>
+            <Setter Property="Width" Value="1"/>
+            <Setter Property="Height" Value="13"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="StackPanel.tabWrap:pointerover Rectangle.tabSep">
+            <Setter Property="Opacity" Value="0"/>
+        </Style>
+        <Style Selector="StackPanel.tabWrap.active Rectangle.tabSep">
+            <Setter Property="Opacity" Value="0"/>
+        </Style>
+        <!-- No trailing divider after the last tab (it would touch the "+"). -->
+        <Style Selector="ItemsControl#TabsHost ContentPresenter:nth-last-child(1) Rectangle.tabSep">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+        <!-- The lifted (dragged) tab must not float its divider along. -->
+        <Style Selector="ContentPresenter.dragging Rectangle.tabSep">
+            <Setter Property="Opacity" Value="0"/>
+        </Style>
+
+        <!-- File icon (folded-page outline), muted → accent when active. -->
+        <Style Selector="Path.tabIcon">
+            <Setter Property="Stroke" Value="{DynamicResource TextMuted}"/>
+        </Style>
+        <Style Selector="Border.fileTab.active Path.tabIcon">
+            <Setter Property="Stroke" Value="{DynamicResource AccentColor}"/>
+        </Style>
+
+        <Style Selector="TextBlock.tabName">
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}"/>
+            <!-- Cap the title so a long file name can't push the pin/close
+                 glyphs past the tab's MaxWidth=200 (the horizontal StackPanel
+                 never constrains children). Budget: 200 − 14 padding − icon 12
+                 − unsaved dot 8 − pin 18 − close 18 − 4×6 spacing = 104. -->
+            <Setter Property="MaxWidth" Value="104"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+        <Style Selector="Border.fileTab.active TextBlock.tabName">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+        <Style Selector="TextBlock.tabName.pinned">
+            <Setter Property="FontStyle" Value="Italic"/>
+        </Style>
+
+        <!-- Pin + close glyph buttons. -->
+        <Style Selector="Button.tabGlyph">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="Width" Value="18"/>
+            <Setter Property="Height" Value="18"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.tabGlyph /template/ ContentPresenter">
+            <Setter Property="CornerRadius" Value="3"/>
+        </Style>
+        <Style Selector="Button.tabGlyph:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ActiveBackground}"/>
+        </Style>
+        <Style Selector="Button.tabGlyph:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+
+        <!-- Close ✕: always visible (Chrome-like), brighter while interacting. -->
+        <Style Selector="Button.tabClose Path">
+            <Setter Property="Stroke" Value="{DynamicResource TextMuted}"/>
+        </Style>
+        <Style Selector="Button.tabClose:pointerover Path">
+            <Setter Property="Stroke" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+        <Style Selector="Button.tabClose">
+            <Setter Property="Opacity" Value="0.6"/>
+        </Style>
+        <Style Selector="Border.fileTab:pointerover Button.tabClose">
+            <Setter Property="Opacity" Value="0.9"/>
+        </Style>
+        <Style Selector="Border.fileTab.active Button.tabClose">
+            <Setter Property="Opacity" Value="0.9"/>
+        </Style>
+
+        <!-- Pin: hover-reveal while unpinned (slanted, muted); pinned = always
+             visible, fully vertical, accent. Vector path — the old 📌 emoji
+             randomly flipped between its red-emoji and gray-text rendering. -->
+        <Style Selector="Button.tabPin Path">
+            <Setter Property="Stroke" Value="{DynamicResource TextMuted}"/>
+            <Setter Property="RenderTransform" Value="rotate(45deg)"/>
+        </Style>
+        <Style Selector="Button.tabPin:pointerover Path">
+            <Setter Property="Stroke" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+        <Style Selector="Button.tabPin.pinned Path">
+            <Setter Property="Stroke" Value="{DynamicResource AccentColor}"/>
+            <Setter Property="RenderTransform" Value="rotate(0deg)"/>
+        </Style>
+        <Style Selector="Button.tabPin">
+            <Setter Property="Opacity" Value="0"/>
+        </Style>
+        <Style Selector="Border.fileTab:pointerover Button.tabPin">
+            <Setter Property="Opacity" Value="0.7"/>
+        </Style>
+        <Style Selector="Button.tabPin.pinned">
+            <Setter Property="Opacity" Value="0.95"/>
+        </Style>
+
+        <!-- "+" new-tab button (Chrome-style, sits right after the last tab). -->
+        <Style Selector="Button.newTab Path">
+            <Setter Property="Stroke" Value="{DynamicResource TextMuted}"/>
+        </Style>
+        <Style Selector="Button.newTab:pointerover Path">
+            <Setter Property="Stroke" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+    </UserControl.Styles>
+
+    <ScrollViewer x:Name="TabsScroll"
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Disabled"
+                  PointerWheelChanged="OnTabsWheel">
+        <StackPanel Orientation="Horizontal">
+            <ItemsControl x:Name="TabsHost" ItemsSource="{Binding OpenSessions}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="0"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:OpenFileSession">
+                        <StackPanel Orientation="Horizontal" Classes="tabWrap"
+                                    Classes.active="{Binding IsActive}">
+                            <Border Classes="fileTab" Classes.active="{Binding IsActive}"
+                                    PointerPressed="OnTabPointerPressed"
+                                    PointerMoved="OnTabPointerMoved"
+                                    PointerReleased="OnTabPointerReleased"
+                                    PointerCaptureLost="OnTabCaptureLost"
+                                    ToolTip.Tip="{Binding Path}">
+                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <!-- File icon (folded page) -->
+                                    <Path Classes="tabIcon" Width="12" Height="13" Stretch="Uniform"
+                                          StrokeThickness="1.3" VerticalAlignment="Center"
+                                          Data="M3.5,1.5 H8.5 L12,5 V14 H3.5 Z M8.5,1.5 V5 H12"/>
+                                    <TextBlock Classes="tabName" Classes.pinned="{Binding IsPinned}"
+                                               Text="{Binding DisplayName}"/>
+                                    <!-- Unsaved indicator (accent dot) -->
+                                    <TextBlock Text="&#x2022;" FontSize="14" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource AccentColor}"
+                                               IsVisible="{Binding HasUnsavedChanges}"/>
+                                    <!-- Pin (hover-reveal; vertical accent when pinned) -->
+                                    <Button Classes="tabGlyph tabPin" Classes.pinned="{Binding IsPinned}"
+                                            Click="OnTabPin"
+                                            ToolTip.Tip="{Binding [tabs.pin], Source={x:Static loc:Loc.Instance}}">
+                                        <Path Width="14" Height="14" Stretch="None"
+                                              StrokeThickness="1.2" StrokeLineCap="Round" StrokeJoin="Round"
+                                              Fill="Transparent"
+                                              Data="M4.5,1.5 H9.5 M5.5,1.5 V5 L3.5,7 H10.5 L8.5,5 V1.5 M7,7 V12"/>
+                                    </Button>
+                                    <!-- Close (always visible; hidden on pinned tabs) -->
+                                    <Button Classes="tabGlyph tabClose" Click="OnTabClose"
+                                            IsVisible="{Binding !IsPinned}"
+                                            ToolTip.Tip="{Binding [tabs.close], Source={x:Static loc:Loc.Instance}}">
+                                        <Path Width="8" Height="8" Stretch="None"
+                                              StrokeThickness="1.2" StrokeLineCap="Round"
+                                              Data="M0,0 L8,8 M8,0 L0,8"/>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                            <!-- Divider to the next tab -->
+                            <Rectangle Classes="tabSep"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- New tab → the regular Open-file flow -->
+            <Button Classes="tabGlyph newTab" Click="OnNewTab"
+                    Width="24" Height="24" Margin="3,0,0,0" VerticalAlignment="Center"
+                    ToolTip.Tip="{Binding [toolbar.open], Source={x:Static loc:Loc.Instance}}">
+                <Path Width="10" Height="10" Stretch="None"
+                      StrokeThickness="1.4" StrokeLineCap="Round"
+                      Data="M5,0.5 V9.5 M0.5,5 H9.5"/>
+            </Button>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,68 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:m="using:SmartUnrealLocalization.Models"
+             xmlns:loc="using:SmartUnrealLocalization.Localization"
+             x:Class="SmartUnrealLocalization.Controls.Toast"
+             x:DataType="m:ToastNotification"
+             x:Name="Root"
+             MinWidth="280" MaxWidth="420">
+
+    <!-- 360 px wide pill, left accent stripe whose colour comes from the
+         ToastNotification.StripeBrushKey (DynamicResource via code-behind so
+         it tracks theme switches). Drop shadow gives it lift over the grid
+         without resorting to a heavy translucent overlay. -->
+    <Border Background="{DynamicResource ChromeBackground}"
+            BorderBrush="{DynamicResource BorderColor}"
+            BorderThickness="1"
+            Padding="0"
+            Margin="0,4,0,0"
+            BoxShadow="0 4 12 0 #66000000">
+        <Grid ColumnDefinitions="3,Auto,*,Auto,Auto">
+
+            <!-- Left accent stripe — its Background is set in code-behind via
+                 DynamicResource so dark/light theme switch repaints it. -->
+            <Border Grid.Column="0"
+                    x:Name="StripeAccent"
+                    Width="3"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"/>
+
+            <!-- Glyph: drawn here as plain TextBlock; colour also via code-behind. -->
+            <TextBlock Grid.Column="1"
+                       x:Name="GlyphText"
+                       Text="{Binding Glyph}"
+                       FontSize="15"
+                       FontWeight="Bold"
+                       VerticalAlignment="Center"
+                       Margin="12,10,8,10"/>
+
+            <!-- Message body — wraps if long; ellipsizes at MaxWidth. -->
+            <TextBlock Grid.Column="2"
+                       Text="{Binding Message}"
+                       FontSize="12.5"
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource TextPrimary}"
+                       Margin="0,10,8,10"/>
+
+            <!-- Undo affordance — visible only when ToastNotification.HasUndo. -->
+            <Button Grid.Column="3"
+                    Classes="action"
+                    IsVisible="{Binding HasUndo}"
+                    Padding="8,3"
+                    Margin="0,6,4,6"
+                    Click="OnUndoClick"
+                    Content="{Binding [toast.undo], Source={x:Static loc:Loc.Instance}}"/>
+
+            <!-- Dismiss × — tiny chrome-style button. -->
+            <Button Grid.Column="4"
+                    Classes="chromeButton"
+                    Width="28" Height="28"
+                    Margin="0,2,2,2"
+                    Click="OnDismissClick"
+                    ToolTip.Tip="{Binding [toast.dismiss], Source={x:Static loc:Loc.Instance}}">
+                <TextBlock Text="&#x2715;" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Button>
+        </Grid>
+    </Border>
+</UserControl>

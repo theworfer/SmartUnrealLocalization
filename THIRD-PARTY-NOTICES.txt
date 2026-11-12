@@ -1,0 +1,129 @@
+THIRD-PARTY NOTICES - Smart Unreal Localization 1.0
+====================================================
+
+Smart Unreal Localization is released under the MIT License (see LICENSE).
+It is built with the open-source components listed below. Each one remains
+under its own license and belongs to its own authors. Full license texts are
+in the "licenses" folder next to this file; MIT components share the MIT text
+reproduced at the end of this file, under their own copyright holders.
+
+Everything listed here ships inside SmartUnrealLocalization.exe. Build-time
+and development-only tools are listed separately at the end and are NOT
+part of the released program.
+
+
+1. Components shipped with the program
+--------------------------------------
+
+User interface
+- Avalonia UI 12.0.2 (Avalonia, Avalonia.Desktop, Avalonia.Win32,
+  Avalonia.Skia, Avalonia.HarfBuzz, Avalonia.Themes.Fluent,
+  Avalonia.Remote.Protocol and the platform packages the framework pulls in:
+  Avalonia.Native, Avalonia.X11, Avalonia.FreeDesktop, Avalonia.FreeDesktop.AtSpi)
+  MIT - Copyright (c) AvaloniaUI OU and contributors
+  https://github.com/AvaloniaUI/Avalonia
+- Avalonia.Controls.DataGrid 12.0.0
+  MIT - Copyright (c) AvaloniaUI OU and contributors
+  https://github.com/AvaloniaUI/Avalonia.Controls.DataGrid
+- Avalonia.Fonts.Inter 12.0.2 - MIT (package), embeds the Inter typeface:
+  Inter - SIL Open Font License 1.1 - Copyright (c) 2016 The Inter Project Authors
+  https://github.com/rsms/inter                    licenses/Inter-OFL-1.1.txt
+- ANGLE (Avalonia.Angle.Windows.Natives 2.1.25547.20250602) - OpenGL ES on Direct3D
+  BSD-3-Clause - Copyright The ANGLE Project Authors
+  https://github.com/AvaloniaUI/angle               licenses/ANGLE-LICENSE.txt
+- MicroCom.Runtime 0.11.4 - MIT - Copyright (c) Nikita Tsukanov
+  https://github.com/kekekeks/MicroCom
+- Tmds.DBus.Protocol 0.92.0 - MIT - Copyright (c) Tom Deseyn
+  https://github.com/tmds/Tmds.DBus  (Linux accessibility bus; inert on Windows)
+
+Rendering and text shaping
+- SkiaSharp 3.119.4-preview.1.1 and SkiaSharp.NativeAssets.*
+  MIT - Copyright (c) 2015-2016 Xamarin, Inc.; (c) 2017-2018 Microsoft Corporation
+  https://github.com/mono/SkiaSharp                 licenses/SkiaSharp-LICENSE.txt
+- HarfBuzzSharp 8.3.1.3 and HarfBuzzSharp.NativeAssets.*
+  MIT - Copyright (c) Microsoft Corporation
+  https://github.com/mono/SkiaSharp
+  The native Skia and HarfBuzz libraries inside these packages contain further
+  third-party code (Skia, HarfBuzz, FreeType, libpng, zlib, libjpeg-turbo,
+  libwebp, expat and others). Their notices, as published by the SkiaSharp
+  project:                     licenses/SkiaSharp-HarfBuzzSharp-native-THIRD-PARTY-NOTICES.txt
+
+Application libraries
+- CommunityToolkit.Mvvm 8.4.1 - MIT - Copyright (c) .NET Foundation and Contributors
+  https://github.com/CommunityToolkit/dotnet
+- CsvHelper 33.1.0 - MS-PL OR Apache-2.0 (used under Apache-2.0) - Copyright (c) Josh Close
+  https://github.com/JoshClose/CsvHelper            licenses/Apache-2.0.txt
+- Newtonsoft.Json 13.0.4 - MIT - Copyright (c) 2007 James Newton-King
+  https://github.com/JamesNK/Newtonsoft.Json
+- ModelContextProtocol / ModelContextProtocol.Core 2.0.0-preview.2 - Apache-2.0
+  Copyright the Model Context Protocol C# SDK contributors
+  https://github.com/modelcontextprotocol/csharp-sdk  licenses/Apache-2.0.txt
+- Microsoft.Extensions.* 10.0 (Hosting, DependencyInjection, Configuration,
+  Logging, Options, Primitives, FileProviders, FileSystemGlobbing, Diagnostics,
+  Caching.Abstractions, AI.Abstractions), System.Text.Json, System.Text.Encodings.Web,
+  System.IO.Pipelines, System.Diagnostics.DiagnosticSource, System.Diagnostics.EventLog,
+  System.Net.ServerSentEvents, System.Security.Cryptography.ProtectedData,
+  Microsoft.IO.RecyclableMemoryStream
+  MIT - Copyright (c) .NET Foundation and Contributors / Microsoft Corporation
+  https://github.com/dotnet/dotnet, https://github.com/dotnet/extensions,
+  https://github.com/Microsoft/Microsoft.IO.RecyclableMemoryStream
+
+Runtime
+- .NET 8 runtime (bundled: the release is self-contained)
+  MIT - Copyright (c) .NET Foundation and Contributors
+  https://github.com/dotnet/runtime                 licenses/dotnet-runtime-LICENSE.txt
+  The runtime's own third-party notices:            licenses/dotnet-runtime-THIRD-PARTY-NOTICES.txt
+
+First-party, listed for completeness
+- LocresIO - the .locres engine of this project - MIT (LocresIO/LICENSE).
+  Its CityHash64 implementation follows Google CityHash (MIT,
+  Copyright (c) 2011 Google, Inc.)                  licenses/CityHash-MIT.txt
+
+
+2. Not shipped (build and development only)
+-------------------------------------------
+
+- AvaloniaUI.DiagnosticsSupport 2.2.1 - developer tools, referenced in Debug
+  builds only; excluded from Release (see SmartUnrealLocalization.csproj).
+- Avalonia.BuildServices 11.3.2 - MIT - build-time MSBuild task.
+- Test-only: xUnit (Apache-2.0), xunit.runner.visualstudio (Apache-2.0),
+  Microsoft.NET.Test.Sdk (MIT), Avalonia.Headless (MIT)
+  (SmartUnrealLocalization.Tests, LocresIO.Tests).
+
+
+3. Data, names and trademarks
+-----------------------------
+
+- No code from Epic Games, Unreal Engine or the UnrealLocres tool is included.
+  LocresIO is a clean-room implementation written from the format description
+  in LocresIO/FORMAT.md.
+- "Unreal" and "Unreal Engine" are trademarks of Epic Games, Inc. This project
+  is not affiliated with or endorsed by Epic Games.
+- Names of AI services (Gemini, OpenAI, Anthropic and others) and MCP clients
+  appear only to identify the services a user can connect with their own
+  account; they belong to their owners.
+- Interface fonts other than Inter (Segoe UI, Segoe UI Symbol, Cascadia Code,
+  Consolas and others) are not bundled; they are used only when installed on
+  the user's system.
+
+
+MIT License (text shared by the MIT-licensed components above)
+--------------------------------------------------------------
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.

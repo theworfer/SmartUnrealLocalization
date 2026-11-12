@@ -1,0 +1,1550 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SmartUnrealLocalization.ViewModels"
+        xmlns:m="using:SmartUnrealLocalization.Models"
+        xmlns:loc="using:SmartUnrealLocalization.Localization"
+        xmlns:c="using:SmartUnrealLocalization.Controls"
+        xmlns:u="using:SmartUnrealLocalization.Utils"
+        xmlns:conv="clr-namespace:Avalonia.Data.Converters;assembly=Avalonia.Base"
+        x:Class="SmartUnrealLocalization.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title=""
+        Width="1280" Height="800"
+        MinWidth="900" MinHeight="500"
+        WindowStartupLocation="CenterScreen"
+        CanResize="True"
+        Background="{DynamicResource WindowBackground}"
+        TransparencyLevelHint="None"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="36">
+
+    <Window.Styles>
+        <!-- Collapse Avalonia-drawn full-screen caption buttons to zero width so min/max/close stay flush right -->
+        <Style Selector="Window /template/ Button#PART_FullScreenButton">
+            <Setter Property="Width" Value="0"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
+        <Style Selector="Button#PART_FullScreenButton">
+            <Setter Property="Width" Value="0"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
+        <Style Selector="Window /template/ Button#PART_PopoverFullScreenButton">
+            <Setter Property="Width" Value="0"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
+        <Style Selector="Button#PART_PopoverFullScreenButton">
+            <Setter Property="Width" Value="0"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
+    </Window.Styles>
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="F8" Command="{Binding CheckTagsCommand}"/>
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveCurrentFormatCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+S" Command="{Binding SaveAsCommand}"/>
+    </Window.KeyBindings>
+
+    <Border x:Name="RootBorder">
+        <Grid>
+        <DockPanel>
+
+            <!-- ════════════════════════════════════════════════════════
+                 HEADER BAR (custom chrome) — title-bar gradient
+               ════════════════════════════════════════════════════════ -->
+            <Border DockPanel.Dock="Top" Classes="headerBar" PointerPressed="OnHeaderPressed">
+                <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto">
+
+                    <!-- Logo: the SUL wordmark -->
+                    <TextBlock Grid.Column="0" Text="SUL"
+                               Margin="14,0,12,0"
+                               FontSize="11"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource AccentColor}"
+                               VerticalAlignment="Center"/>
+
+                    <!-- Menu (6 top-level) -->
+                    <Menu Grid.Column="1" VerticalAlignment="Stretch" Background="Transparent">
+                        <MenuItem Header="{Binding [menu.file], Source={x:Static loc:Loc.Instance}}"
+                                  SubmenuOpened="OnFileMenuOpened">
+                            <MenuItem Header="{Binding [menu.file.open], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnOpenFile" InputGesture="Ctrl+O"/>
+                            <MenuItem Header="{Binding [menu.file.openSpreadsheet], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnOpenSpreadsheet"/>
+                            <MenuItem Header="{Binding [menu.file.importTarget], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnImportTarget"/>
+                            <Separator/>
+                            <MenuItem Header="{Binding [menu.file.save], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnSaveCurrentFormat" InputGesture="Ctrl+S"/>
+                            <MenuItem Header="{Binding [menu.file.export], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnExportLocres" InputGesture="Ctrl+E"/>
+                            <MenuItem Header="{Binding [menu.file.saveAs], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnSaveAs" InputGesture="Ctrl+Shift+S"/>
+                            <MenuItem Header="{Binding [menu.file.saveAsFlat], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnSaveAsFlattened"
+                                      ToolTip.Tip="{Binding [menu.file.saveAsFlat.tooltip], Source={x:Static loc:Loc.Instance}}"/>
+                            <Separator/>
+                            <MenuItem Header="{Binding [menu.file.mergeNewVersion], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnMergeToNewVersion"/>
+                            <Separator/>
+                            <!-- Filled from the recent-files list each time the File menu opens
+                                 (the same list as the welcome screen's Recent column). -->
+                            <MenuItem x:Name="MenuRecent" Header="{Binding [menu.file.recent], Source={x:Static loc:Loc.Instance}}"/>
+                            <Separator/>
+                            <MenuItem Header="{Binding [menu.file.exit], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnExitApp" InputGesture="Alt+F4"/>
+                        </MenuItem>
+
+                        <MenuItem Header="{Binding [menu.edit], Source={x:Static loc:Loc.Instance}}">
+                            <MenuItem Header="{Binding [menu.edit.undo], Source={x:Static loc:Loc.Instance}}"
+                                      Command="{Binding UndoCommand}" InputGesture="Ctrl+Z"/>
+                            <MenuItem Header="{Binding [menu.edit.redo], Source={x:Static loc:Loc.Instance}}"
+                                      Command="{Binding RedoCommand}" InputGesture="Ctrl+Y"/>
+                            <Separator/>
+                            <MenuItem Header="{Binding [menu.edit.find], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnFind" InputGesture="Ctrl+F"/>
+                            <MenuItem Header="{Binding [menu.edit.findReplace], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnFindReplace" InputGesture="Ctrl+H"/>
+                            <Separator/>
+                            <MenuItem Header="{Binding [menu.edit.copySourceToTarget], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnCopySourceToTarget" InputGesture="Ctrl+T"/>
+                            <MenuItem Header="{Binding [menu.edit.copySourceToTargetAll], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnCopySourceToTargetMulti" InputGesture="Ctrl+Shift+T"/>
+                            <Separator/>
+                            <MenuItem Header="{Binding [menu.edit.copyAllTable], Source={x:Static loc:Loc.Instance}}"
+                                      Command="{Binding CopyAllTableCommand}"/>
+                        </MenuItem>
+
+                        <MenuItem Header="{Binding [menu.view], Source={x:Static loc:Loc.Instance}}">
+                            <MenuItem Header="{Binding [menu.view.promptHistory], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnPromptHistoryToggle"/>
+                            <MenuItem Header="{Binding [menu.view.toggleLogs], Source={x:Static loc:Loc.Instance}}"
+                                      Command="{Binding ToggleLogsCommand}"/>
+                            <Separator/>
+                            <MenuItem Header="{Binding [menu.view.showEmptyKeys], Source={x:Static loc:Loc.Instance}}"
+                                      ToggleType="CheckBox"
+                                      IsChecked="{Binding ShowEmptyKeys, Mode=TwoWay}"/>
+                            <Separator/>
+                            <MenuItem Header="{Binding [menu.view.toggleTheme], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnToggleTheme"/>
+                        </MenuItem>
+
+                        <!-- No placeholder items: every entry here does something. -->
+                        <MenuItem Header="{Binding [menu.tools], Source={x:Static loc:Loc.Instance}}">
+                            <MenuItem Header="{Binding [menu.tools.aiTranslation], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnAITranslation"/>
+                            <MenuItem Header="{Binding [menu.tools.tmFolder], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnOpenTmFolder"/>
+                            <Separator/>
+                            <!-- Runs every validator; F8 is also wired at the Window level. -->
+                            <MenuItem Header="{Binding [menu.tools.runValidation], Source={x:Static loc:Loc.Instance}}"
+                                      Command="{Binding CheckTagsCommand}"
+                                      InputGesture="F8"/>
+                            <Separator/>
+                            <MenuItem Header="{Binding [menu.tools.preferences], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnPreferences"/>
+                            <MenuItem Header="{Binding [menu.tools.advanced], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnAdvancedSettings"/>
+                        </MenuItem>
+
+                        <MenuItem Header="{Binding [menu.help], Source={x:Static loc:Loc.Instance}}">
+                            <MenuItem x:Name="MenuHelpDocs" Header="{Binding [menu.help.docs], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnOpenDocs"/>
+                            <MenuItem Header="{Binding [menu.help.license], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnLicenses"/>
+                            <MenuItem x:Name="MenuCheckUpdates"
+                                      Header="{Binding [menu.help.checkUpdates], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnCheckUpdates"/>
+                            <Separator/>
+                            <MenuItem Header="{Binding [menu.help.about], Source={x:Static loc:Loc.Instance}}"
+                                      Click="OnAbout"/>
+                        </MenuItem>
+                    </Menu>
+
+                    <!-- Separator -->
+                    <Border Grid.Column="2" Classes="vSeparator"/>
+
+                    <!-- Undo / Redo -->
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Icons are drawn in the design's 24-unit space and render-scaled
+                             to 14px so stroke thickness shrinks with them (SVG semantics) —
+                             Stretch=Uniform would keep strokes thick and kill the padding. -->
+                        <Button Classes="toolbarIcon action26" Command="{Binding UndoCommand}"
+                                ToolTip.Tip="{Binding [toolbar.undo], Source={x:Static loc:Loc.Instance}}">
+                            <Path Width="24" Height="24" RenderTransform="scale(0.583)"
+                                  Stroke="{DynamicResource TextSecondary}"
+                                  StrokeThickness="1.8" StrokeLineCap="Round" StrokeJoin="Round"
+                                  Fill="Transparent"
+                                  Data="M9,14 L4,9 L9,4 M4,9 L15,9 A5,5 0 0 1 20,14 A5,5 0 0 1 15,19 L11,19"/>
+                        </Button>
+                        <Button Classes="toolbarIcon action26" Command="{Binding RedoCommand}"
+                                ToolTip.Tip="{Binding [toolbar.redo], Source={x:Static loc:Loc.Instance}}">
+                            <Path Width="24" Height="24" RenderTransform="scale(0.583)"
+                                  Stroke="{DynamicResource TextSecondary}"
+                                  StrokeThickness="1.8" StrokeLineCap="Round" StrokeJoin="Round"
+                                  Fill="Transparent"
+                                  Data="M15,14 L20,9 L15,4 M20,9 L9,9 A5,5 0 0 0 4,14 A5,5 0 0 0 9,19 L13,19"/>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Toolbar: Open / Save / Play -->
+                    <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center"
+                                Margin="6,0,0,0">
+                        <Button Classes="toolbarIcon" Click="OnOpenFile"
+                                ToolTip.Tip="{Binding [toolbar.open], Source={x:Static loc:Loc.Instance}}">
+                            <Path Width="24" Height="24" RenderTransform="scale(0.583)"
+                                  Stroke="{DynamicResource TextSecondary}"
+                                  StrokeThickness="1.6" StrokeLineCap="Round" StrokeJoin="Round"
+                                  Fill="Transparent"
+                                  Data="M5 19h14a1 1 0 0 0 1-1V10H4v8a1 1 0 0 0 1 1z M4 10V6a1 1 0 0 1 1-1h4l2 2h8a1 1 0 0 1 1 1v2"/>
+                        </Button>
+                        <Button Classes="toolbarIcon" Click="OnSaveCurrentFormat"
+                                ToolTip.Tip="{Binding [toolbar.save], Source={x:Static loc:Loc.Instance}}">
+                            <Path Width="24" Height="24" RenderTransform="scale(0.583)"
+                                  Stroke="{DynamicResource TextSecondary}"
+                                  StrokeThickness="1.6" StrokeLineCap="Round" StrokeJoin="Round"
+                                  Fill="Transparent"
+                                  Data="M5 4h11l3 3v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z M7 4v5h8V4 M7 13H17V19H7Z"/>
+                        </Button>
+                        <Button Classes="toolbarIcon" Click="OnRunValidation"
+                                ToolTip.Tip="{Binding [toolbar.playValidate], Source={x:Static loc:Loc.Instance}}">
+                            <!-- A check mark on a shield: validation checks the file.
+                                 (A play triangle read as "run the game".) -->
+                            <Path Width="24" Height="24" RenderTransform="scale(0.583)"
+                                  Stroke="{DynamicResource TextSecondary}"
+                                  StrokeThickness="1.7" StrokeLineCap="Round" StrokeJoin="Round"
+                                  Fill="Transparent"
+                                  Data="M12 2.5 L20 5.5 V11 C20 16 16.6 19.8 12 21.5 C7.4 19.8 4 16 4 11 V5.5 Z M8.3 11.6 L11 14.3 L15.9 8.9"/>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Drag area (empty *). Its width is the room the pill has. -->
+                    <Border x:Name="HeaderDragArea" Grid.Column="5" Background="Transparent"
+                            SizeChanged="OnHeaderDragAreaSizeChanged"/>
+
+                    <!-- Project pill. It shares the star column with the drag area
+                         and trims, so when the window is narrow IT gives way — not the
+                         language and theme buttons, which at 900 px used to be pushed
+                         under Windows' own caption buttons (German) or off the window
+                         altogether (Japanese). The full name stays in the tooltip.
+                         Once it could show only its dot, the slot hides it: the file
+                         name is on its tab anyway. -->
+                    <Panel x:Name="ProjectPillSlot" Grid.Column="5" HorizontalAlignment="Right">
+                        <Border Classes="projectPill"
+                                IsVisible="{Binding HasCurrentFormat}"
+                                Margin="8,0,8,0"
+                                ToolTip.Tip="{Binding CurrentFileName}">
+                            <Border.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="{Binding [project.closeFile], Source={x:Static loc:Loc.Instance}}"
+                                              Click="OnCloseCurrentFile"/>
+                                </ContextMenu>
+                            </Border.ContextMenu>
+                            <!-- DockPanel, not a horizontal StackPanel: a StackPanel measures
+                                 its text with unlimited width, so it could never trim. -->
+                            <DockPanel VerticalAlignment="Center">
+                                <Ellipse Classes="projectPillDot" DockPanel.Dock="Left" Margin="0,0,8,0"/>
+                                <TextBlock Text="{Binding ProjectPillText}"
+                                           FontSize="11.5" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimary}"
+                                           TextTrimming="CharacterEllipsis"
+                                           VerticalAlignment="Center"/>
+                            </DockPanel>
+                        </Border>
+                    </Panel>
+
+                    <!-- Language + theme (140 px right margin to clear native OS caption buttons) -->
+                    <StackPanel Grid.Column="6" Orientation="Horizontal" Spacing="2"
+                                Margin="0,0,140,0" VerticalAlignment="Center">
+
+                        <!-- Interface language. Deliberately here and not only in
+                             Settings: someone who opened the app in a language they
+                             cannot read has to be able to find the way out without
+                             navigating a settings panel written in that language.
+                             The mark is the wen/A pair the web has settled on for
+                             "language": it names two writing systems instead of
+                             describing one in words, so it reads the same to
+                             someone who can read neither. Google's diagonal
+                             arrangement, at 1.9 rather than the 1.6 the other
+                             header icons use — each glyph only gets a quarter of
+                             the box here, and the extra weight is what keeps it
+                             legible at 14 px. The kanji's dot sits higher than the
+                             character really wants for the same reason: at 1.9 its
+                             round cap and the bar's grow into each other and the
+                             top of the glyph fills in solid.
+                             The menu lists each language under its OWN name. -->
+                        <Button x:Name="BtnLanguage"
+                                Classes="toolbarIcon"
+                                Click="OnLanguageMenu"
+                                ToolTip.Tip="{Binding [prefs.language], Source={x:Static loc:Loc.Instance}}">
+                            <Path Width="24" Height="24" RenderTransform="scale(0.583)"
+                                  Stroke="{DynamicResource TextSecondary}"
+                                  StrokeThickness="1.9" StrokeLineCap="Round" StrokeJoin="Round"
+                                  Fill="Transparent"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  Data="M6.8,2.2 L6.3,3.4 M1.8,5.9 H11.2 M9.6,6.3 C8.4,8.4 6,11.3 3.2,13.4 M4.4,6.3 C5.6,8.4 8,11.3 10.8,13.4 M11.8,22 L17.4,10.8 L23,22 M13.9,17.8 H20.9"/>
+                        </Button>
+
+                        <Button Classes="toolbarIcon"
+                                Click="OnToggleTheme"
+                                ToolTip.Tip="{Binding [toolbar.themeToggle], Source={x:Static loc:Loc.Instance}}">
+                            <!-- Monochrome sun/moon (design I.sun / I.moon) — code-behind
+                                 swaps Data on theme change. -->
+                            <Path x:Name="ThemeIcon" Width="24" Height="24" RenderTransform="scale(0.583)"
+                                  Stroke="{DynamicResource TextSecondary}"
+                                  StrokeThickness="1.6" StrokeLineCap="Round"
+                                  Fill="Transparent"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  Data="M16,12 A4,4 0 1 1 8,12 A4,4 0 1 1 16,12 Z M12,2 V4 M12,20 V22 M4,12 H2 M22,12 H20 M5,5 L6.4,6.4 M17.6,17.6 L19,19 M5,19 L6.4,17.6 M17.6,6.4 L19,5"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ════════════════════════════════════════════════════════
+                 STATUS BAR — bottom gradient strip
+               ════════════════════════════════════════════════════════ -->
+            <Border DockPanel.Dock="Bottom" Classes="statusBar">
+                <!-- Four columns that negotiate space, instead of three layers laid
+                     over one cell: at the minimum width the centred format badge
+                     used to draw on top of the labels beside it. The message in the
+                     star column is what gives way — it trims first. -->
+                <Grid Margin="12,0" ColumnDefinitions="Auto,*,Auto,Auto">
+
+                    <!-- LEFT: rows by their MOST SERIOUS problem. A row counts once
+                         here however many problems it has; the Problems tab lists
+                         every problem — the tooltips say so, because the two numbers
+                         differ. Hidden until a file is open: on the welcome screen
+                         they were three meaningless zeros. -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center"
+                                IsVisible="{Binding HasData}">
+                        <ToggleButton IsChecked="{Binding ShowOnlyCellRecovered}"
+                                      Classes="filterChip" VerticalAlignment="Center"
+                                      ToolTip.Tip="{Binding [status.chip.errors.tooltip], Source={x:Static loc:Loc.Instance}}">
+                            <ToggleButton.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="{Binding [status.menu.clearForSelected], Source={x:Static loc:Loc.Instance}}"
+                                              Command="{Binding ClearCellRecoveredFromSelectedCommand}"/>
+                                </ContextMenu>
+                            </ToggleButton.ContextMenu>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="{x:Static u:Glyphs.ErrorRound}" Foreground="{DynamicResource StatusBarErrorMark}" FontSize="12" VerticalAlignment="Center"/>
+                                <TextBlock Classes="statusItem" Text="{Binding CellRecoveredCount}"/>
+                            </StackPanel>
+                        </ToggleButton>
+
+                        <ToggleButton IsChecked="{Binding ShowOnlyTagReplaced}"
+                                      Classes="filterChip" VerticalAlignment="Center"
+                                      ToolTip.Tip="{Binding [status.chip.warnings.tooltip], Source={x:Static loc:Loc.Instance}}">
+                            <ToggleButton.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="{Binding [status.menu.clearForSelected], Source={x:Static loc:Loc.Instance}}"
+                                              Command="{Binding ClearTagReplacedFromSelectedCommand}"/>
+                                </ContextMenu>
+                            </ToggleButton.ContextMenu>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="{x:Static u:Glyphs.Warning}" Foreground="{DynamicResource StatusBarWarningMark}" FontSize="12" VerticalAlignment="Center"/>
+                                <TextBlock Classes="statusItem" Text="{Binding TagReplacedCount}"/>
+                            </StackPanel>
+                        </ToggleButton>
+
+                        <ToggleButton IsChecked="{Binding ShowOnlyInfo}"
+                                      Classes="filterChip" VerticalAlignment="Center"
+                                      ToolTip.Tip="{Binding [status.chip.info.tooltip], Source={x:Static loc:Loc.Instance}}">
+                            <ToggleButton.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="{Binding [status.menu.clearForSelected], Source={x:Static loc:Loc.Instance}}"
+                                              Command="{Binding ClearInfoFromSelectedCommand}"/>
+                                </ContextMenu>
+                            </ToggleButton.ContextMenu>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="{x:Static u:Glyphs.InfoRound}" Foreground="{DynamicResource StatusBarInfoMark}" FontSize="12" VerticalAlignment="Center"/>
+                                <TextBlock Classes="statusItem" Text="{Binding InfoCount}"/>
+                            </StackPanel>
+                        </ToggleButton>
+                    </StackPanel>
+
+                    <!-- The last message: whatever width is left, trimmed. -->
+                    <TextBlock Grid.Column="1" Classes="statusItem"
+                               Text="{Binding StatusText}"
+                               TextTrimming="CharacterEllipsis"
+                               Margin="12,0"
+                               ToolTip.Tip="{Binding StatusText}"/>
+
+                    <!-- The format, in a column of its own so it cannot drift onto
+                         the labels beside it. -->
+                    <Border Grid.Column="2" Classes="statusFormat"
+                            IsVisible="{Binding HasCurrentFormat}"
+                            Margin="0,0,14,0"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="{Binding CurrentFormatBadge}"
+                                   FontSize="10.5" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextOnAccent}"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- RIGHT: selection, filter, progress, log. Groups are spaced by
+                         the panel, not by per-item margins: with the "(N shown)" hint
+                         hidden, "Selected: 0" used to run straight into "Showing",
+                         and read as "0 Showing". -->
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+
+                        <!-- Checked rows in the WHOLE file — the scope every
+                             "selected" operation actually runs on. -->
+                        <!-- The Runs of each label sit on ONE line, tag against tag. A
+                             line break between two Runs is itself a space, so the old
+                             one-Run-per-line layout plus explicit " " Runs rendered
+                             "Selected:   0" with three. -->
+                        <StackPanel Orientation="Horizontal" Spacing="4" IsVisible="{Binding HasData}">
+                            <TextBlock Classes="statusItem"
+                                       ToolTip.Tip="{Binding [status.selected.tooltip], Source={x:Static loc:Loc.Instance}}"
+                                       ><Run Text="{Binding [status.selected], Source={x:Static loc:Loc.Instance}}"/><Run Text=" "/><Run Text="{Binding SelectedCount}"/></TextBlock>
+                            <!-- Part of the selection is hidden by the active filter. -->
+                            <TextBlock Classes="statusItem"
+                                       IsVisible="{Binding HasSelectionOutsideFilter}"
+                                       ToolTip.Tip="{Binding [status.selected.hidden.tooltip], Source={x:Static loc:Loc.Instance}}"
+                                       ><Run Text="("/><Run Text="{Binding SelectedVisibleCount}"/><Run Text=" "/><Run Text="{Binding [status.selected.visible], Source={x:Static loc:Loc.Instance}}"/><Run Text=")"/></TextBlock>
+                        </StackPanel>
+
+                        <!-- Only while a filter hides rows. Unfiltered, "Showing Y of
+                             Y" just repeated the total "Untranslated: N / Y" already
+                             states. -->
+                        <TextBlock Classes="statusItem" IsVisible="{Binding IsFilterHidingRows}"
+                                   ><Run Text="{Binding [status.showing], Source={x:Static loc:Loc.Instance}}"/><Run Text=" "/><Run Text="{Binding FilteredRowCount}"/><Run Text=" "/><Run Text="{Binding [status.of], Source={x:Static loc:Loc.Instance}}"/><Run Text=" "/><Run Text="{Binding RowCount}"/></TextBlock>
+
+                        <!-- Untranslated over the WHOLE file (not filter-aware), so the
+                             translator always sees how much work is left. -->
+                        <TextBlock Classes="statusItem"
+                                   IsVisible="{Binding HasData}"
+                                   ToolTip.Tip="{Binding [status.untranslated.tooltip], Source={x:Static loc:Loc.Instance}}"
+                                   ><Run Text="{Binding [status.untranslated], Source={x:Static loc:Loc.Instance}}"/><Run Text=" "/><Run Text="{Binding UntranslatedCount}"/><Run Text=" / "/><Run Text="{Binding RowCount}"/></TextBlock>
+
+                        <Button Classes="action" Command="{Binding ToggleLogsCommand}"
+                                ToolTip.Tip="{Binding [status.logs], Source={x:Static loc:Loc.Instance}}"
+                                Padding="6,2" VerticalAlignment="Center">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="{Binding [status.menu.clearLogs], Source={x:Static loc:Loc.Instance}}" Command="{Binding ClearLogsCommand}"/>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <Path Width="24" Height="24" RenderTransform="scale(0.5)" Margin="-6"
+                                      Stroke="{DynamicResource TextOnAccent}" Opacity="0.95"
+                                      StrokeThickness="1.6" StrokeLineCap="Round"
+                                      Fill="Transparent" VerticalAlignment="Center"
+                                      Data="M4,5 H20 M4,9 H20 M4,13 H14 M4,17 H16"/>
+                                <TextBlock Classes="statusItem" Text="{Binding [status.logs], Source={x:Static loc:Loc.Instance}}"/>
+                                <Border Background="{DynamicResource BorderColor}" Padding="3,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Logs.Count}" FontSize="9" Foreground="{DynamicResource TextPrimary}"/>
+                                </Border>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ════════════════════════════════════════════════════════
+                 ACTIVITY BAR (left) — 4 tool toggles
+               ════════════════════════════════════════════════════════ -->
+            <Border DockPanel.Dock="Left" Classes="activityBar">
+                <DockPanel LastChildFill="False">
+                    <!-- Etap 11 handoff order (top→bottom): AI / Status / Solution /
+                         Find, with Settings docked at the bottom. DockPanel stacks
+                         Top-docked children in declaration order. -->
+                    <Button x:Name="AiSidebarButton"
+                            DockPanel.Dock="Top" Classes="sidebarIcon" Click="OnAITranslation"
+                            ToolTip.Tip="{Binding [sidebar.aiTranslate], Source={x:Static loc:Loc.Instance}}">
+                        <Grid Width="44" Height="38">
+                            <Border Classes="sidebarActiveBar" IsVisible="{Binding ShowAiPanel}"/>
+                            <Path Classes="sideFill" Width="18" Height="18"
+                                  Stretch="Uniform"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  Data="M10,1 L11.8,6.2 L17,8 L11.8,9.8 L10,15 L8.2,9.8 L3,8 L8.2,6.2 Z M3,2 L3.8,4.2 L6,5 L3.8,5.8 L3,8 L2.2,5.8 L0,5 L2.2,4.2 Z"/>
+                        </Grid>
+                    </Button>
+                    <!-- Multi-translate: globe icon (ring + equator + meridian) for the
+                         one-run-many-languages batch panel. -->
+                    <Button x:Name="MultiTranslateSidebarButton"
+                            DockPanel.Dock="Top" Classes="sidebarIcon" Click="OnMultiTranslateToggle"
+                            ToolTip.Tip="{Binding [sidebar.multiTranslate], Source={x:Static loc:Loc.Instance}}">
+                        <Grid Width="44" Height="38">
+                            <Border Classes="sidebarActiveBar" IsVisible="{Binding ShowMultiTranslatePanel}"/>
+                            <Path Classes="sideStroke" Width="18" Height="18" Stretch="Uniform"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center" StrokeThickness="1.5"
+                                  Data="M10,2 A8,8 0 1,0 10,18 A8,8 0 1,0 10,2 Z M2,10 L18,10 M10,2 C6,5 6,15 10,18 C14,15 14,5 10,2 Z"/>
+                        </Grid>
+                    </Button>
+                    <!-- Status: clock-face icon (ring + hour & minute hands).
+                         Uses Path.sideFill so SyncActivityBarState's `.active` class
+                         turns the icon accent-coloured when ShowStatusPanel=true,
+                         the same way the other left-bar icons highlight. -->
+                    <!-- QC: quality control over an already-translated file.
+                         Wordmark button (literal "QC" capitals, by design). -->
+                    <Button x:Name="QcSidebarButton"
+                            DockPanel.Dock="Top" Classes="sidebarIcon" Click="OnQcToggle"
+                            ToolTip.Tip="{Binding [sidebar.qc], Source={x:Static loc:Loc.Instance}}">
+                        <Grid Width="44" Height="38">
+                            <Border Classes="sidebarActiveBar" IsVisible="{Binding ShowQcPanel}"/>
+                            <TextBlock Classes="sideWordmark" Text="QC"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Button>
+                    <Button x:Name="StatusSidebarButton"
+                            DockPanel.Dock="Top" Classes="sidebarIcon" Click="OnStatusToggle"
+                            ToolTip.Tip="{Binding [sidebar.status], Source={x:Static loc:Loc.Instance}}">
+                        <Grid Width="44" Height="38">
+                            <Border Classes="sidebarActiveBar" IsVisible="{Binding ShowStatusPanel}"/>
+                            <Path Classes="sideFill" Width="17" Height="17"
+                                  Stretch="Uniform"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  Data="M 7,0 C 10.866,0 14,3.134 14,7 C 14,10.866 10.866,14 7,14 C 3.134,14 0,10.866 0,7 C 0,3.134 3.134,0 7,0 Z M 7,1.5 C 3.962,1.5 1.5,3.962 1.5,7 C 1.5,10.038 3.962,12.5 7,12.5 C 10.038,12.5 12.5,10.038 12.5,7 C 12.5,3.962 10.038,1.5 7,1.5 Z M 6.4,3 L 7.5,3 L 7.5,7.5 L 6.4,7.5 Z M 7,7 L 10.5,7 L 10.5,7.9 L 7,7.9 Z"/>
+                        </Grid>
+                    </Button>
+                    <!-- Prompt history: a clock running backwards (the usual "history" mark). -->
+                    <Button x:Name="PromptHistoryButton"
+                            DockPanel.Dock="Top" Classes="sidebarIcon" Click="OnPromptHistoryToggle"
+                            ToolTip.Tip="{Binding [sidebar.promptHistory], Source={x:Static loc:Loc.Instance}}">
+                        <Grid Width="44" Height="38">
+                            <Border Classes="sidebarActiveBar" IsVisible="{Binding ShowPromptHistoryPanel}"/>
+                            <Path Classes="sideStroke" Width="18" Height="18" Stretch="Uniform"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  StrokeThickness="1.6" StrokeLineCap="Round" StrokeJoin="Round"
+                                  Data="M3.5,12 A8.5,8.5 0 1 0 6.2,5.8 M3.5,4 V8 H7.5 M12,7.5 V12 L15,14"/>
+                        </Grid>
+                    </Button>
+                    <Button x:Name="FindSidebarButton"
+                            DockPanel.Dock="Top" Classes="sidebarIcon" Click="OnFindReplaceToggle"
+                            ToolTip.Tip="{Binding [sidebar.findReplace], Source={x:Static loc:Loc.Instance}}">
+                        <Grid Width="44" Height="38">
+                            <Border Classes="sidebarActiveBar" IsVisible="{Binding IsFindBarOpen}"/>
+                            <Path Classes="sideFill" Width="17" Height="17"
+                                  Stretch="Uniform"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  Data="M7,2 C4.24,2 2,4.24 2,7 C2,9.76 4.24,12 7,12 C8.1,12 9.1,11.65 9.9,11.05 L14,15.2 L15.2,14 L11.05,9.9 C11.65,9.1 12,8.1 12,7 C12,4.24 9.76,2 7,2 Z M7,4 C8.66,4 10,5.34 10,7 C10,8.66 8.66,10 7,10 C5.34,10 4,8.66 4,7 C4,5.34 5.34,4 7,4 Z"/>
+                        </Grid>
+                    </Button>
+                    <Button x:Name="SettingsSidebarButton"
+                            DockPanel.Dock="Bottom" Classes="sidebarIcon" Click="OnPreferences"
+                            ToolTip.Tip="{Binding [sidebar.settings], Source={x:Static loc:Loc.Instance}}">
+                        <Grid Width="44" Height="38">
+                            <Border Classes="sidebarActiveBar" IsVisible="{Binding ShowSettingsPanel}"/>
+                            <!-- Vector gear (design I.gear). The old ⚙ TextBlock flipped
+                                 between color-emoji and monochrome rendering whenever the
+                                 active/hover style changed its Foreground. -->
+                            <Path Classes="sideStroke" Width="18" Height="18" Stretch="Uniform"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  StrokeThickness="1.5" StrokeLineCap="Round" StrokeJoin="Round"
+                                  Data="M15,12 A3,3 0 1 1 9,12 A3,3 0 1 1 15,12 Z M19.4,15 a1.7,1.7 0 0 0 0.3,1.8 l0.1,0.1 a2,2 0 1 1 -2.8,2.8 l-0.1,-0.1 a1.7,1.7 0 0 0 -1.8,-0.3 a1.7,1.7 0 0 0 -1,1.5 V21 a2,2 0 0 1 -4,0 v-0.1 a1.7,1.7 0 0 0 -1.1,-1.5 a1.7,1.7 0 0 0 -1.8,0.3 l-0.1,0.1 a2,2 0 1 1 -2.8,-2.8 l0.1,-0.1 a1.7,1.7 0 0 0 0.3,-1.8 a1.7,1.7 0 0 0 -1.5,-1 H3 a2,2 0 0 1 0,-4 h0.1 a1.7,1.7 0 0 0 1.5,-1.1 a1.7,1.7 0 0 0 -0.3,-1.8 l-0.1,-0.1 a2,2 0 1 1 2.8,-2.8 l0.1,0.1 a1.7,1.7 0 0 0 1.8,0.3 H9 a1.7,1.7 0 0 0 1,-1.5 V3 a2,2 0 0 1 4,0 v0.1 a1.7,1.7 0 0 0 1,1.5 a1.7,1.7 0 0 0 1.8,-0.3 l0.1,-0.1 a2,2 0 1 1 2.8,2.8 l-0.1,0.1 a1.7,1.7 0 0 0 -0.3,1.8 V9 a1.7,1.7 0 0 0 1.5,1 H21 a2,2 0 0 1 0,4 h-0.1 a1.7,1.7 0 0 0 -1.5,1 z"/>
+                        </Grid>
+                    </Button>
+                </DockPanel>
+            </Border>
+
+            <!-- ════════════════════════════════════════════════════════
+                 SIDE PANEL HOST — AI Translate / Settings (Find & Replace is a modal overlay below)
+               ════════════════════════════════════════════════════════ -->
+            <Border DockPanel.Dock="Left"
+                    x:Name="SidePanelHost"
+                    Background="{DynamicResource WindowBackgroundElev}"
+                    BorderBrush="{DynamicResource BorderSubtle}"
+                    BorderThickness="0,0,1,0"
+                    Width="460"
+                    IsVisible="{Binding IsSidePanelVisible}">
+                <Grid>
+                    <c:AiTranslatePanel x:Name="AiTranslatePanelHost"
+                                        IsVisible="{Binding ShowAiPanel}"/>
+                    <c:StatusPanel x:Name="StatusPanelHost"
+                                   IsVisible="{Binding ShowStatusPanel}"/>
+                    <c:SettingsPanel x:Name="SettingsPanelHost"
+                                     IsVisible="{Binding ShowSettingsPanel}"/>
+                    <c:MultiTranslatePanel x:Name="MultiTranslatePanelHost"
+                                           IsVisible="{Binding ShowMultiTranslatePanel}"/>
+                    <c:QcPanel x:Name="QcPanelHost"
+                               IsVisible="{Binding ShowQcPanel}"/>
+                    <c:PromptHistoryPanel x:Name="PromptHistoryPanelHost"
+                                          IsVisible="{Binding ShowPromptHistoryPanel}"/>
+                </Grid>
+            </Border>
+
+            <!-- ════════════════════════════════════════════════════════
+                 FILTER BAR — Select All + AI Translate selected chip + Filter
+               ════════════════════════════════════════════════════════ -->
+            <Border DockPanel.Dock="Top"
+                    Background="{DynamicResource PanelBackground2}"
+                    BorderBrush="{DynamicResource BorderSubtle}"
+                    BorderThickness="0,0,0,1"
+                    Height="38"
+                    Padding="14,0"
+                    IsVisible="{Binding HasData}">
+                <!-- Filter bar — kept minimal: only the Expand-rows toggle and the
+                     Filter dropdown. The earlier "Select all" tri-state checkbox
+                     lived in the per-row checkbox column header; the "AI Translate
+                     selected" chip was removed at the user's request to declutter. -->
+                <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+                    <!-- File tabs (Etap 13) fill the left; the chips sit on the right. -->
+                    <c:FileTabsBar Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Left"
+                                   Margin="0,0,14,0"/>
+
+                    <!-- QC bulk actions — present ONLY while the QC panel is open and
+                         suggestions exist (deliberately scoped). -->
+                    <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8"
+                                Margin="8,0,0,0" VerticalAlignment="Center"
+                                IsVisible="{Binding ShowQcActions}">
+                        <Button Classes="chip" Command="{Binding QcFixAllCommand}"
+                                ToolTip.Tip="{Binding [qc.fixAll.tooltip], Source={x:Static loc:Loc.Instance}}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="{Binding [qc.fixAll], Source={x:Static loc:Loc.Instance}}"
+                                           FontSize="11.5" VerticalAlignment="Center"/>
+                                <Border Background="{DynamicResource BorderColor}" Padding="3,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding QcPendingCount}" FontSize="9"
+                                               Foreground="{DynamicResource TextPrimary}"/>
+                                </Border>
+                            </StackPanel>
+                        </Button>
+                        <Button Classes="chip" Command="{Binding QcFixSelectedCommand}"
+                                IsVisible="{Binding HasSelection}"
+                                ToolTip.Tip="{Binding [qc.fixSelected.tooltip], Source={x:Static loc:Loc.Instance}}">
+                            <TextBlock Text="{Binding [qc.fixSelected], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11.5" VerticalAlignment="Center"/>
+                        </Button>
+                    </StackPanel>
+
+                    <ToggleButton Grid.Column="2" Classes="chip" Margin="0,0,8,0"
+                                  IsChecked="{Binding AutoExpandRows, Mode=TwoWay}"
+                                  ToolTip.Tip="{Binding [filter.autoExpand.tooltip], Source={x:Static loc:Loc.Instance}}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <!-- Rows-with-expand-arrows glyph (design I.expandRows, 12px from
+                                 24-unit space). Stroke comes from the ToggleButton.chip style
+                                 so it follows the accent state when the toggle is checked. -->
+                            <Path Width="24" Height="24" RenderTransform="scale(0.5)"
+                                  Margin="-6"
+                                  StrokeThickness="1.7"
+                                  StrokeLineCap="Round"
+                                  StrokeJoin="Round"
+                                  Fill="Transparent"
+                                  Data="M4 6h16M4 12h16M4 18h16 M9 9l3-3 3 3 M9 15l3 3 3-3"/>
+                            <TextBlock Text="{Binding [filter.autoExpand], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11.5" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ToggleButton>
+
+                    <!-- Sort chip (Etap 12): EditedAt sort modes. Turns accent while a
+                         non-Default mode is active (hint that column-header sort is off). -->
+                    <Button Grid.Column="1" Classes="chip" Margin="0,0,8,0"
+                            Classes.accent="{Binding IsSortByEdited}"
+                            ToolTip.Tip="{Binding [sort.tooltip], Source={x:Static loc:Loc.Instance}}">
+                        <Button.Flyout>
+                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuItem Header="{Binding [sort.default], Source={x:Static loc:Loc.Instance}}"
+                                          Command="{Binding SetSortDefaultCommand}">
+                                    <MenuItem.Icon>
+                                        <TextBlock Text="&#x25CF;" FontSize="9" IsVisible="{Binding IsSortDefault}"
+                                                   Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="{Binding [sort.newer], Source={x:Static loc:Loc.Instance}}"
+                                          Command="{Binding SetSortNewerCommand}">
+                                    <MenuItem.Icon>
+                                        <TextBlock Text="&#x25CF;" FontSize="9" IsVisible="{Binding IsSortNewer}"
+                                                   Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="{Binding [sort.older], Source={x:Static loc:Loc.Instance}}"
+                                          Command="{Binding SetSortOlderCommand}">
+                                    <MenuItem.Icon>
+                                        <TextBlock Text="&#x25CF;" FontSize="9" IsVisible="{Binding IsSortOlder}"
+                                                   Foreground="{DynamicResource AccentColor}" VerticalAlignment="Center"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </MenuFlyout>
+                        </Button.Flyout>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <!-- Up/down arrows, 12px from 24-unit space (same treatment as
+                                 the Expand-rows icon); stroke colour comes from chipStrokeIcon
+                                 so the accent state recolours it. -->
+                            <Path Classes="chipStrokeIcon" Width="24" Height="24"
+                                  RenderTransform="scale(0.5)" Margin="-6"
+                                  StrokeThickness="1.7" StrokeLineCap="Round" StrokeJoin="Round"
+                                  Fill="Transparent"
+                                  Data="M7,4 V20 M3,8 L7,4 L11,8 M17,20 V4 M13,16 L17,20 L21,16"/>
+                            <TextBlock Text="{Binding [sort.button], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11.5" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Grid.Column="3" Classes="chip"
+                            x:Name="FilterDropdownBtn"
+                            ToolTip.Tip="{Binding [filter.button], Source={x:Static loc:Loc.Instance}}">
+                        <Button.Flyout>
+                            <Flyout Placement="BottomEdgeAlignedRight">
+                                <StackPanel Width="290" Spacing="8" Margin="2">
+                                    <!-- Status -->
+                                    <TextBlock Text="{Binding [filter.section.status], Source={x:Static loc:Loc.Instance}}"
+                                               FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}"/>
+                                    <CheckBox Content="{Binding [filter.translated], Source={x:Static loc:Loc.Instance}}"
+                                              IsChecked="{Binding ShowOnlyTranslated, Mode=TwoWay}"/>
+                                    <CheckBox Content="{Binding [filter.untranslated], Source={x:Static loc:Loc.Instance}}"
+                                              IsChecked="{Binding ShowOnlyUntranslated, Mode=TwoWay}"/>
+                                    <CheckBox Content="{Binding [filter.selected], Source={x:Static loc:Loc.Instance}}"
+                                              IsChecked="{Binding ShowOnlySelected, Mode=TwoWay}"/>
+                                    <CheckBox Content="{Binding [filter.unselected], Source={x:Static loc:Loc.Instance}}"
+                                              IsChecked="{Binding ShowOnlyUnselected, Mode=TwoWay}"/>
+
+                                    <Separator/>
+                                    <!-- Review -->
+                                    <TextBlock Text="{Binding [filter.section.review], Source={x:Static loc:Loc.Instance}}"
+                                               FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}"/>
+                                    <CheckBox Content="{Binding [filter.review.approved], Source={x:Static loc:Loc.Instance}}"
+                                              IsChecked="{Binding FilterIncludeApproved, Mode=TwoWay}"/>
+                                    <CheckBox Content="{Binding [filter.review.rejected], Source={x:Static loc:Loc.Instance}}"
+                                              IsChecked="{Binding FilterIncludeRejected, Mode=TwoWay}"/>
+                                    <CheckBox Content="{Binding [filter.review.unreviewed], Source={x:Static loc:Loc.Instance}}"
+                                              IsChecked="{Binding FilterIncludeUnreviewed, Mode=TwoWay}"/>
+                                    <CheckBox Content="{Binding [filter.onlyCommented], Source={x:Static loc:Loc.Instance}}"
+                                              IsChecked="{Binding ShowOnlyCommented, Mode=TwoWay}"/>
+
+                                    <!-- Merge results. Only present after "Merge to
+                                         new version". Rows whose ORIGINAL changed are
+                                         not carried at all now, so they show up under
+                                         Untranslated and need no chip of their own. -->
+                                    <StackPanel IsVisible="{Binding HasMergeFlags}" Spacing="4">
+                                        <Separator/>
+                                        <TextBlock Text="{Binding [filter.section.merge], Source={x:Static loc:Loc.Instance}}"
+                                                   FontSize="11" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextMuted}"/>
+                                        <CheckBox Content="{Binding [filter.newKeys], Source={x:Static loc:Loc.Instance}}"
+                                                  IsChecked="{Binding ShowOnlyNewKeys, Mode=TwoWay}"/>
+                                    </StackPanel>
+
+                                    <Separator/>
+                                    <!-- Recent activity -->
+                                    <TextBlock Text="{Binding [filter.section.recent], Source={x:Static loc:Loc.Instance}}"
+                                               FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}"/>
+                                    <CheckBox Content="{Binding [filter.recentlyEdited], Source={x:Static loc:Loc.Instance}}"
+                                              IsChecked="{Binding ShowOnlyRecentlyEdited, Mode=TwoWay}"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                                IsEnabled="{Binding ShowOnlyRecentlyEdited}">
+                                        <TextBlock Text="{Binding [filter.lastN], Source={x:Static loc:Loc.Instance}}"
+                                                   FontSize="12" VerticalAlignment="Center"/>
+                                        <NumericUpDown Value="{Binding RecentEditLimit, Mode=TwoWay}"
+                                                       Minimum="0" Maximum="100000" Increment="10"
+                                                       FormatString="0" Width="120"/>
+                                    </StackPanel>
+
+                                    <Separator/>
+                                    <!-- Text contains -->
+                                    <TextBlock Text="{Binding [filter.section.text], Source={x:Static loc:Loc.Instance}}"
+                                               FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}"/>
+                                    <Grid ColumnDefinitions="Auto,*">
+                                        <ComboBox Grid.Column="0" Width="92"
+                                                  SelectedIndex="{Binding FilterTextColumnIndex, Mode=TwoWay}">
+                                            <ComboBoxItem Content="{Binding [find.col.key], Source={x:Static loc:Loc.Instance}}"/>
+                                            <ComboBoxItem Content="{Binding [find.col.source], Source={x:Static loc:Loc.Instance}}"/>
+                                            <ComboBoxItem Content="{Binding [find.col.target], Source={x:Static loc:Loc.Instance}}"/>
+                                        </ComboBox>
+                                        <TextBox Grid.Column="1" Classes="form" Margin="6,0,0,0"
+                                                 Text="{Binding FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 PlaceholderText="{Binding [filter.textPlaceholder], Source={x:Static loc:Loc.Instance}}"/>
+                                    </Grid>
+
+                                    <Separator/>
+                                    <!-- Search (Ctrl+F) matches -->
+                                    <CheckBox Content="{Binding [filter.foundRows], Source={x:Static loc:Loc.Instance}}"
+                                              IsChecked="{Binding ShowOnlyFoundRows, Mode=TwoWay}"/>
+                                    <TextBlock Classes="hint"
+                                               Text="{Binding [filter.foundRows.hint], Source={x:Static loc:Loc.Instance}}"/>
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <!-- Funnel (design I.filter), 12px from 24-unit space. -->
+                            <Path Width="24" Height="24"
+                                  RenderTransform="scale(0.5)" Margin="-6"
+                                  Fill="{DynamicResource TextPrimary}"
+                                  Data="M3,5 H21 L14,14 V20 L10,18 V14 Z"/>
+                            <TextBlock Text="{Binding [filter.button], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11.5" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- ════════════════════════════════════════════════════════
+                 MAIN CONTENT — Welcome view OR (DataGrid + Logs)
+               ════════════════════════════════════════════════════════ -->
+            <Grid>
+                <!-- DataGrid + GridSplitter + Logs panel. The Welcome view occupies
+                     row 0 when no file is open (the grid is no longer gated on HasData),
+                     so the Logs tab is reachable from the Welcome page too. -->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" MinHeight="200"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{Binding LogPanelHeight, Mode=TwoWay}" MinHeight="{Binding LogPanelMinHeight}"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Row 0 content: Welcome (no file open) OR the DataGrid (file open). -->
+                    <c:WelcomeView x:Name="WelcomeViewHost" Grid.Row="0"
+                                   IsVisible="{Binding !HasData}"/>
+
+                    <DataGrid Grid.Row="0"
+                              x:Name="MainDataGrid"
+                              IsVisible="{Binding HasData}"
+                              ItemsSource="{Binding Rows}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserResizeColumns="True"
+                              CanUserSortColumns="False"
+                              SelectionMode="Extended"
+                              SelectionChanged="OnGridSelectionChanged"
+                              GridLinesVisibility="Vertical"
+                              HorizontalGridLinesBrush="{DynamicResource BorderSubtle}"
+                              VerticalGridLinesBrush="{DynamicResource BorderSubtle}">
+
+                        <DataGrid.Styles>
+                            <!-- Row Background is owned by the custom DataGridRow
+                                 ControlTemplate in AppTheme.axaml (bound to
+                                 TranslationRow.RowBackground). This inline style
+                                 only attaches the per-row context menu. -->
+                            <Style Selector="DataGridRow" x:DataType="m:TranslationRow">
+                                <Setter Property="ContextMenu">
+                                    <ContextMenu>
+                                        <MenuItem Header="{Binding [ctx.copySource], Source={x:Static loc:Loc.Instance}}" Click="OnCtxCopySource"/>
+                                        <MenuItem Header="{Binding [ctx.copyTarget], Source={x:Static loc:Loc.Instance}}" Click="OnCtxCopyTarget"/>
+                                        <MenuItem Header="{Binding [ctx.copyKey], Source={x:Static loc:Loc.Instance}}" Click="OnCtxCopyKey"/>
+                                        <Separator/>
+                                        <MenuItem Header="{Binding [ctx.copySrcToTgt], Source={x:Static loc:Loc.Instance}}"
+                                                  InputGesture="Ctrl+T" Click="OnCtxCopySrcToTgt"/>
+                                        <MenuItem Header="{Binding [ctx.clearTarget], Source={x:Static loc:Loc.Instance}}" Click="OnCtxClearTarget"/>
+                                        <Separator/>
+                                        <!-- Review (Etap 11). Always enabled; ApplyReview only changes rows
+                                             that aren't already at the target status (no-op + no toast
+                                             otherwise). This avoids the shared-ContextMenu stale-DataContext
+                                             bug that could wrongly disable an item for the next row. -->
+                                        <MenuItem Click="OnCtxMarkApproved"
+                                                  Header="{Binding [ctx.markApproved], Source={x:Static loc:Loc.Instance}}"/>
+                                        <MenuItem Click="OnCtxMarkRejected"
+                                                  Header="{Binding [ctx.markRejected], Source={x:Static loc:Loc.Instance}}"/>
+                                        <MenuItem Click="OnCtxClearReview"
+                                                  Header="{Binding [ctx.clearReview], Source={x:Static loc:Loc.Instance}}"/>
+                                        <Separator/>
+                                        <MenuItem Header="{Binding [ctx.aiRow], Source={x:Static loc:Loc.Instance}}" Click="OnCtxAiRow"/>
+                                        <MenuItem Header="{Binding [ctx.sendToTm], Source={x:Static loc:Loc.Instance}}" Click="OnCtxSendToTm"/>
+                                        <Separator/>
+                                        <MenuItem Header="{Binding [ctx.firstDup], Source={x:Static loc:Loc.Instance}}" Click="OnCtxGoToFirstDuplicate"/>
+                                        <MenuItem Header="{Binding [ctx.showInExp], Source={x:Static loc:Loc.Instance}}" Click="OnCtxShowInExplorer"/>
+                                    </ContextMenu>
+                                </Setter>
+                            </Style>
+                            <Style Selector="DataGridCell" x:DataType="m:TranslationRow">
+                                <Setter Property="Background" Value="Transparent"/>
+                            </Style>
+                            <Style Selector="DataGridCell:selected" x:DataType="m:TranslationRow">
+                                <Setter Property="Background" Value="Transparent"/>
+                            </Style>
+                            <Style Selector="DataGridCell:current" x:DataType="m:TranslationRow">
+                                <Setter Property="Background" Value="Transparent"/>
+                            </Style>
+                            <Style Selector="DataGridCell:pressed" x:DataType="m:TranslationRow">
+                                <Setter Property="Background" Value="Transparent"/>
+                            </Style>
+                            <Style Selector="DataGridCell:focus" x:DataType="m:TranslationRow">
+                                <Setter Property="Background" Value="Transparent"/>
+                            </Style>
+                            <Style Selector="DataGridCell:focus-within" x:DataType="m:TranslationRow">
+                                <Setter Property="Background" Value="Transparent"/>
+                            </Style>
+                        </DataGrid.Styles>
+
+                        <DataGrid.Columns>
+                            <!-- Selection checkbox column. Header hosts the tri-state Select All. -->
+                            <DataGridTemplateColumn Width="42" IsReadOnly="False" CanUserResize="False">
+                                <DataGridTemplateColumn.Header>
+                                    <CheckBox x:Name="HeaderSelectAll"
+                                              Classes="gridCheck"
+                                              IsThreeState="True"
+                                              IsChecked="{Binding IsAllSelected, Mode=OneWay}"
+                                              Click="OnHeaderSelectAllClicked"
+                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Padding="0" MinWidth="0"
+                                              ToolTip.Tip="{Binding [filter.selectAll], Source={x:Static loc:Loc.Instance}}"/>
+                                </DataGridTemplateColumn.Header>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="-12,-9,-12,-9"
+                                              HorizontalAlignment="Stretch"
+                                              VerticalAlignment="Stretch">
+                                            <Border Width="2"
+                                                    HorizontalAlignment="Left"
+                                                    Background="{DynamicResource AccentColor}"
+                                                    IsVisible="{Binding IsFocusedRow}"/>
+                                            <CheckBox Classes="gridCheck"
+                                                      IsChecked="{Binding IsSelected}" Click="OnRowCheckboxClicked"
+                                                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                      Padding="0" MinWidth="0"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Status icon (Etap 3): one glyph per row driven by the
+                                 TranslationRow.StatusIcon* computed properties. Severity
+                                 (Error/Warning/Info) wins over Review (Approved/Rejected);
+                                 empty string => the TextBlock collapses out of layout.
+                                 Etap 6: PointerEntered / PointerExited hand off to the
+                                 ProblemPopoverService to show the row's first Problem detail. -->
+                            <DataGridTemplateColumn Width="42" IsReadOnly="True" CanUserResize="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="m:TranslationRow">
+                                        <!-- Vector status icon: a solid severity shape with a
+                                             CUT-OUT glyph (GridBackground colour) so the X / ! / i
+                                             read as holes, like the prototype. Only one child is
+                                             ever visible at a time (StatusShow* flags). -->
+                                        <Grid Width="15" Height="15"
+                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Background="Transparent"
+                                              ToolTip.Tip="{Binding StatusIconTooltip}"
+                                              PointerEntered="OnStatusIconHoverIn"
+                                              PointerExited="OnStatusIconHoverOut">
+                                            <!-- ERROR: danger circle + cut-out X -->
+                                            <Grid IsVisible="{Binding StatusShowError}">
+                                                <Ellipse Width="14" Height="14" Fill="{DynamicResource DangerColor}"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <Path Width="15" Height="15" Stretch="None"
+                                                      Stroke="{DynamicResource GridBackground}" StrokeThickness="1.6"
+                                                      StrokeLineCap="Round" Data="M5.3,5.3 L9.7,9.7 M9.7,5.3 L5.3,9.7"/>
+                                            </Grid>
+                                            <!-- WARNING: warning triangle + cut-out ! -->
+                                            <Grid IsVisible="{Binding StatusShowWarning}">
+                                                <Path Width="15" Height="15" Stretch="None"
+                                                      Fill="{DynamicResource WarningColor}"
+                                                      Data="M7.5,1.3 L14.2,13.7 L0.8,13.7 Z"/>
+                                                <Path Width="15" Height="15" Stretch="None"
+                                                      Stroke="{DynamicResource GridBackground}" StrokeThickness="1.5"
+                                                      StrokeLineCap="Round" Data="M7.5,5.6 L7.5,9.6"/>
+                                                <Ellipse Width="1.7" Height="1.7" Fill="{DynamicResource GridBackground}"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                         Margin="0,7.4,0,0"/>
+                                            </Grid>
+                                            <!-- INFO: info circle + cut-out i (distinct dot + gap + stem) -->
+                                            <Grid IsVisible="{Binding StatusShowInfo}">
+                                                <Ellipse Width="14" Height="14" Fill="{DynamicResource InfoColor}"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <Ellipse Width="1.8" Height="1.8" Fill="{DynamicResource GridBackground}"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                         Margin="0,-4.0,0,0"/>
+                                                <Path Width="15" Height="15" Stretch="None"
+                                                      Stroke="{DynamicResource GridBackground}" StrokeThickness="1.6"
+                                                      StrokeLineCap="Round" Data="M7.5,7 L7.5,11"/>
+                                            </Grid>
+                                            <!-- APPROVED: green check -->
+                                            <Path IsVisible="{Binding StatusShowApproved}"
+                                                  Width="15" Height="15" Stretch="None"
+                                                  Stroke="{DynamicResource SuccessColor}" StrokeThickness="1.8"
+                                                  StrokeLineCap="Round" StrokeJoin="Round" Data="M3,8 L6.3,11.3 L12,4.7"/>
+                                            <!-- REJECTED: red X (no circle) -->
+                                            <Path IsVisible="{Binding StatusShowRejected}"
+                                                  Width="15" Height="15" Stretch="None"
+                                                  Stroke="{DynamicResource DangerColor}" StrokeThickness="1.8"
+                                                  StrokeLineCap="Round" Data="M4,4 L11,11 M11,4 L4,11"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Key column - monospaced. Header is clickable for sort cycle. Width restored from AppConfig.KeyColumnWidth. -->
+                            <DataGridTemplateColumn Width="220" MinWidth="100" MaxWidth="480" IsReadOnly="True">
+                                <DataGridTemplateColumn.Header>
+                                    <Border Background="Transparent" Cursor="Hand"
+                                            Tag="Key" PointerPressed="OnSortHeaderPressed">
+                                        <Border.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="{Binding [ctx.copyColumn], Source={x:Static loc:Loc.Instance}}" Click="OnCopyColumn" CommandParameter="Key"/>
+                                            </ContextMenu>
+                                        </Border.ContextMenu>
+                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <TextBlock Text="KEY" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding KeySortGlyph}" FontSize="10"
+                                                       Foreground="{DynamicResource AccentColor}"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataGridTemplateColumn.Header>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <c:SelectableCellText Text="{Binding Key}" Classes="keyCell"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Source — tag-aware. Resizable; default 260, restored from AppConfig. -->
+                            <DataGridTemplateColumn Width="260" MinWidth="180" MaxWidth="900" IsReadOnly="True">
+                                <DataGridTemplateColumn.Header>
+                                    <Border Background="Transparent" Cursor="Hand"
+                                            Tag="Source" PointerPressed="OnSortHeaderPressed">
+                                        <Border.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="{Binding [ctx.copyColumn], Source={x:Static loc:Loc.Instance}}" Click="OnCopyColumn" CommandParameter="Source"/>
+                                            </ContextMenu>
+                                        </Border.ContextMenu>
+                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <TextBlock Text="SOURCE" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding SourceSortGlyph}" FontSize="10"
+                                                       Foreground="{DynamicResource AccentColor}"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataGridTemplateColumn.Header>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <!-- x:DataType is mandatory here: compiled bindings need the
+                                         row's data type to resolve the $parent[Window] lookup +
+                                         the (vm:MainWindowViewModel) DataContext cast. -->
+                                    <DataTemplate x:DataType="m:TranslationRow">
+                                        <!-- Wrap = (this row is being edited) OR (global Expand-rows
+                                             toggle is on). The IsEditing input lets Source grow
+                                             alongside the Target TextBox while the user types, so
+                                             a long Source is fully visible during translation —
+                                             without forcing every row in the grid to wrap. -->
+                                        <c:TaggedTextBlock SourceText="{Binding Source}"
+                                                           DoubleClickSelects="Word"
+                                                           FindHits="{Binding SourceFindHits}"
+                                                           CurrentFindHitIndex="{Binding SourceCurrentFindHitIndex}"
+                                                           VerticalAlignment="Top" Margin="12,0">
+                                            <c:TaggedTextBlock.Wrap>
+                                                <MultiBinding Converter="{x:Static conv:BoolConverters.Or}">
+                                                    <Binding Path="IsEditing"/>
+                                                    <Binding Path="$parent[Window].((vm:MainWindowViewModel)DataContext).AutoExpandRows"/>
+                                                </MultiBinding>
+                                            </c:TaggedTextBlock.Wrap>
+                                        </c:TaggedTextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Target (editable) -->
+                            <!-- Target column. IsReadOnly=True kills the DataGrid's native
+                                 click-to-rename / double-tap-to-edit (which used to fire even
+                                 5 seconds after the first click). Inline editing is fully
+                                 model-owned: TaggedTextBlock when !IsEditing, TextBox when
+                                 IsEditing. Flip is triggered by MainWindow's tunnel-handled
+                                 DoubleTapped or F2 key, both of which set row.IsEditing=true. -->
+                            <DataGridTemplateColumn Width="*" IsReadOnly="True" MinWidth="280">
+                                <DataGridTemplateColumn.Header>
+                                    <Border Background="Transparent" Cursor="Hand"
+                                            Tag="Target" PointerPressed="OnSortHeaderPressed">
+                                        <Border.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="{Binding [ctx.copyColumn], Source={x:Static loc:Loc.Instance}}" Click="OnCopyColumn" CommandParameter="Target"/>
+                                                <MenuItem Header="{Binding [ctx.cutColumn], Source={x:Static loc:Loc.Instance}}" Click="OnCutColumn" CommandParameter="Target"/>
+                                                <MenuItem Header="{Binding [ctx.pasteColumn], Source={x:Static loc:Loc.Instance}}" Click="OnPasteColumn" CommandParameter="Target"/>
+                                                <MenuItem Header="{Binding [ctx.clearColumn], Source={x:Static loc:Loc.Instance}}" Click="OnClearColumn" CommandParameter="Target"/>
+                                            </ContextMenu>
+                                        </Border.ContextMenu>
+                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <TextBlock Text="TARGET" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding TargetSortGlyph}" FontSize="10"
+                                                       Foreground="{DynamicResource AccentColor}"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataGridTemplateColumn.Header>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="m:TranslationRow">
+                                        <!-- Grid wrap (Etap 5): left column = the existing text/editor
+                                             stack (Panel); right column = a cell-actions StackPanel
+                                             with the lightbulb 💡 (quick fix) + chevron expand. Hidden
+                                             during editing so they don't clutter the TextBox. -->
+                                        <Grid ColumnDefinitions="*,Auto"
+                                              VerticalAlignment="Stretch"
+                                              Background="Transparent"
+                                              Cursor="IBeam"
+                                              DoubleTapped="OnTargetCellDoubleTapped">
+
+                                            <!-- Cursor=IBeam matches prototype's `.gc.gc-target { cursor: text }`,
+                                                 hinting that the cell is editable on double-click.
+                                                 Background="Transparent" on Grid + DoubleTapped here mean
+                                                 the gesture is recognised on the cell area itself. -->
+                                            <Panel Grid.Column="0" Margin="12,0" VerticalAlignment="Stretch">
+                                                <!-- Etap 4: ProblemSpans bound to the row's full Problems
+                                                     list; TaggedTextBlock filters to Problems with a non-null
+                                                     Range and draws a wavy underline under each intersecting
+                                                     text segment. FindHits stays unbound until Etap 9 adds the
+                                                     inline find bar.
+                                                     Etap 5: Wrap MultiBinding now includes IsExpanded so a
+                                                     per-row chevron toggle wraps just this one row, and
+                                                     IsClipped writes back from TaggedTextBlock's layout pass
+                                                     so the chevron can decide whether to show itself. -->
+                                                <!-- Etap 6: hit-testable so wavy-underline segments can
+                                                     receive PointerEntered/Exited and trigger the
+                                                     ProblemPopoverService. DoubleTapped still bubbles
+                                                     to the parent Grid for the edit-cell gesture. -->
+                                                <c:TaggedTextBlock SourceText="{Binding Target}"
+                                                                   ProblemSpans="{Binding Problems}"
+                                                                   FindHits="{Binding FindHits}"
+                                                                   CurrentFindHitIndex="{Binding CurrentFindHitIndex}"
+                                                                   IsClipped="{Binding IsClipped, Mode=OneWayToSource}"
+                                                                   VerticalAlignment="Top"
+                                                                   IsVisible="{Binding !IsEditing}">
+                                                    <c:TaggedTextBlock.Wrap>
+                                                        <MultiBinding Converter="{x:Static conv:BoolConverters.Or}">
+                                                            <Binding Path="IsEditing"/>
+                                                            <Binding Path="IsExpanded"/>
+                                                            <Binding Path="$parent[Window].((vm:MainWindowViewModel)DataContext).AutoExpandRows"/>
+                                                        </MultiBinding>
+                                                    </c:TaggedTextBlock.Wrap>
+                                                </c:TaggedTextBlock>
+                                                <!-- Italic dim placeholder for untranslated rows,
+                                                     matching prototype's `.empty-cell` span. -->
+                                                <TextBlock Text="{Binding [grid.untranslated], Source={x:Static loc:Loc.Instance}}"
+                                                           FontStyle="Italic"
+                                                           FontSize="11.5"
+                                                           Foreground="{DynamicResource TextDim}"
+                                                           VerticalAlignment="Top"
+                                                           IsHitTestVisible="False"
+                                                           IsVisible="{Binding ShowEmptyTarget}"/>
+                                                <TextBox Classes="gridEditor"
+                                                         Text="{Binding EditValue, Mode=TwoWay}"
+                                                         VerticalAlignment="Center"
+                                                         TextWrapping="Wrap"
+                                                         AcceptsReturn="True"
+                                                         IsVisible="{Binding IsEditing}"
+                                                         u:FocusBehavior.FocusOnVisible="True"
+                                                         LostFocus="OnTargetEditorLostFocus"/>
+                                            </Panel>
+
+                                            <!-- Cell actions on the right edge — visible only when the
+                                                 cell is not in edit mode. Each child hides itself when
+                                                 its own predicate (HasFixableProblem / ShowExpandChevron)
+                                                 is false. -->
+                                            <StackPanel Grid.Column="1"
+                                                        Orientation="Horizontal"
+                                                        Spacing="2"
+                                                        VerticalAlignment="Center"
+                                                        Margin="0,0,6,0"
+                                                        IsVisible="{Binding !IsEditing}">
+                                                <c:LightbulbButton IsVisible="{Binding HasFixableProblem}"/>
+                                                <c:QcButton/>
+                                                <c:CommentButton/>
+                                                <c:CellExpandButton IsVisible="{Binding ShowExpandChevron}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Empty-state overlay when an active filter hides every row (spec §15). -->
+                    <Border Grid.Row="0"
+                            Background="{DynamicResource WindowBackground}"
+                            IsVisible="{Binding FilterKilledAll}"
+                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                            <TextBlock Text="{Binding [grid.filterKilled.title], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       HorizontalAlignment="Center"/>
+                            <Button Classes="subtle"
+                                    HorizontalAlignment="Center"
+                                    Content="{Binding [grid.filterKilled.reset], Source={x:Static loc:Loc.Instance}}"
+                                    Click="OnResetFiltersClick"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Invisible 6px grab strip overlapping the boundary (negative
+                         margins collapse its row to 0), so the only visible line is
+                         the Logs panel's own 1px top border — like the design. -->
+                    <GridSplitter Grid.Row="1"
+                                  Classes="logsSplitter"
+                                  Height="6"
+                                  Margin="0,-3"
+                                  ZIndex="1"
+                                  HorizontalAlignment="Stretch"
+                                  IsVisible="{Binding ShowLogs}"/>
+
+                    <Border Grid.Row="2"
+                            Background="{DynamicResource PanelBackground}"
+                            BorderBrush="{DynamicResource BorderSubtle}"
+                            BorderThickness="0,1,0,0"
+                            IsVisible="{Binding ShowLogs}">
+                        <DockPanel>
+                            <!-- Logs panel header: tabs + clear + hide -->
+                            <Border DockPanel.Dock="Top"
+                                    BorderBrush="{DynamicResource BorderSubtle}"
+                                    BorderThickness="0,0,0,1"
+                                    Padding="12,6">
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4">
+                                        <Button Classes="logTab"
+                                                Classes.active="{Binding IsProblemsTabActive}"
+                                                Command="{Binding ShowProblemsTabCommand}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="{Binding [logs.tab.problems], Source={x:Static loc:Loc.Instance}}"/>
+                                                <TextBlock Text="{Binding ProblemTotalCount}" Opacity="0.6"/>
+                                            </StackPanel>
+                                        </Button>
+                                        <!-- QC appears only once a review produced something,
+                                             so a user who never runs QC never sees it. -->
+                                        <Button Classes="logTab"
+                                                Classes.active="{Binding IsQcTabActive}"
+                                                IsVisible="{Binding HasQcSuggestions}"
+                                                Command="{Binding ShowQcTabCommand}"
+                                                ToolTip.Tip="{Binding [logs.tab.qc.tooltip], Source={x:Static loc:Loc.Instance}}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="{Binding [logs.tab.qc], Source={x:Static loc:Loc.Instance}}"/>
+                                                <TextBlock Text="{Binding QcPendingCount}" Opacity="0.6"/>
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Classes="logTab"
+                                                Classes.active="{Binding IsLogsTabActive}"
+                                                Command="{Binding ShowLogsTabCommand}"
+                                                Content="{Binding [logs.tab.logs], Source={x:Static loc:Loc.Instance}}"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="2" Classes="logTab"
+                                            IsVisible="{Binding IsLogsTabActive}"
+                                            Command="{Binding ClearLogsCommand}"
+                                            Content="{Binding [logs.clear], Source={x:Static loc:Loc.Instance}}"/>
+                                    <Button Grid.Column="3" Classes="logTab"
+                                            Command="{Binding ToggleLogsCommand}"
+                                            ToolTip.Tip="{Binding [logs.hide], Source={x:Static loc:Loc.Instance}}"
+                                            Content="&#x2715;" FontSize="11"
+                                            Padding="6,3"/>
+                                </Grid>
+                            </Border>
+
+                            <Panel>
+                                <!-- ══════════ PROBLEMS VIEW ══════════ -->
+                                <DockPanel IsVisible="{Binding IsProblemsTabActive}">
+                                    <!-- Toolbar: severity segments + Fix all -->
+                                    <Border DockPanel.Dock="Top"
+                                            BorderBrush="{DynamicResource BorderSubtle}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="12,4">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4">
+                                                <Button Classes="logTab" Classes.active="{Binding IsProblemFilterAll}"
+                                                        Command="{Binding SetProblemFilterAllCommand}">
+                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <TextBlock Text="{Binding [problems.filter.all], Source={x:Static loc:Loc.Instance}}"/>
+                                                        <TextBlock Text="{Binding ProblemTotalCount}" Opacity="0.6"/>
+                                                    </StackPanel>
+                                                </Button>
+                                                <Button Classes="logTab" Classes.active="{Binding IsProblemFilterErrors}"
+                                                        Command="{Binding SetProblemFilterErrorsCommand}">
+                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <TextBlock Text="{Binding [problems.filter.errors], Source={x:Static loc:Loc.Instance}}"/>
+                                                        <TextBlock Text="{Binding ProblemErrorCount}" Opacity="0.6"/>
+                                                    </StackPanel>
+                                                </Button>
+                                                <Button Classes="logTab" Classes.active="{Binding IsProblemFilterWarnings}"
+                                                        Command="{Binding SetProblemFilterWarningsCommand}">
+                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <TextBlock Text="{Binding [problems.filter.warnings], Source={x:Static loc:Loc.Instance}}"/>
+                                                        <TextBlock Text="{Binding ProblemWarningCount}" Opacity="0.6"/>
+                                                    </StackPanel>
+                                                </Button>
+                                                <Button Classes="logTab" Classes.active="{Binding IsProblemFilterInfo}"
+                                                        Command="{Binding SetProblemFilterInfoCommand}">
+                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <TextBlock Text="{Binding [problems.filter.info], Source={x:Static loc:Loc.Instance}}"/>
+                                                        <TextBlock Text="{Binding ProblemInfoCount}" Opacity="0.6"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </StackPanel>
+                                            <Button Grid.Column="1" Classes="chip accent"
+                                                    Command="{Binding FixAllProblemsCommand}"
+                                                    ToolTip.Tip="{Binding [problems.fixAll.tooltip], Source={x:Static loc:Loc.Instance}}">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <TextBlock Text="{Binding [problems.fixAll], Source={x:Static loc:Loc.Instance}}"/>
+                                                    <TextBlock Text="{Binding TotalFixableProblemCount}"/>
+                                                </StackPanel>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                    <Panel>
+                                        <ListBox x:Name="ProblemListBox"
+                                                 ItemsSource="{Binding ProblemItems}"
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 SelectionMode="Multiple"
+                                                 KeyDown="OnProblemListKeyDown">
+                                            <ListBox.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="{Binding [ctx.copy], Source={x:Static loc:Loc.Instance}}" Click="OnCopyProblems"/>
+                                                    <MenuItem Header="{Binding [ctx.selectAll], Source={x:Static loc:Loc.Instance}}" Click="OnSelectAllProblems"/>
+                                                </ContextMenu>
+                                            </ListBox.ContextMenu>
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate x:DataType="m:ProblemListItem">
+                                                    <!-- Background="Transparent" is required: a Grid without one has
+                                                         no hit-test surface, so a double-click that landed on the
+                                                         row's empty space (past the end of the text) was ignored. -->
+                                                    <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto"
+                                                          Background="Transparent"
+                                                          Margin="12,3" DoubleTapped="OnProblemItemDoubleTapped"
+                                                          ToolTip.Tip="{Binding Tooltip}">
+                                                        <TextBlock Text="{Binding Glyph}" Tag="{Binding SeverityName}"
+                                                                   FontSize="13" VerticalAlignment="Center" Width="20"
+                                                                   HorizontalAlignment="Center">
+                                                            <TextBlock.Styles>
+                                                                <Style Selector="TextBlock[Tag=Error]"><Setter Property="Foreground" Value="{DynamicResource DangerColor}"/></Style>
+                                                                <Style Selector="TextBlock[Tag=Warning]"><Setter Property="Foreground" Value="{DynamicResource WarningColor}"/></Style>
+                                                                <Style Selector="TextBlock[Tag=Info]"><Setter Property="Foreground" Value="{DynamicResource InfoColor}"/></Style>
+                                                            </TextBlock.Styles>
+                                                        </TextBlock>
+                                                        <TextBlock Grid.Column="1" Text="{Binding KindLabel}"
+                                                                   FontSize="10" FontWeight="Bold" VerticalAlignment="Center"
+                                                                   Foreground="{DynamicResource TextMuted}" Margin="6,0,10,0"/>
+                                                        <TextBlock Grid.Column="2" Text="{Binding Title}"
+                                                                   FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                                                   Foreground="{DynamicResource TextPrimary}"/>
+                                                        <TextBlock Grid.Column="3" Text="{Binding RowKey}"
+                                                                   FontSize="11" VerticalAlignment="Center" Margin="10,0"
+                                                                   Foreground="{DynamicResource TextDim}"
+                                                                   FontFamily="{DynamicResource AppFontFamilyMono}"/>
+                                                        <Button Grid.Column="4" Classes="subtle" Padding="8,2"
+                                                                IsVisible="{Binding HasFix}"
+                                                                Click="OnProblemFixClick"
+                                                                Content="{Binding [problems.fix], Source={x:Static loc:Loc.Instance}}"/>
+                                                        <Button Grid.Column="5" Classes="subtle" Padding="8,2" Margin="4,0,0,0"
+                                                                Click="OnProblemGoClick"
+                                                                Content="{Binding [problems.go], Source={x:Static loc:Loc.Instance}}"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                        <TextBlock IsVisible="{Binding ProblemsListEmpty}"
+                                                   Text="{Binding [problems.empty], Source={x:Static loc:Loc.Instance}}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource TextDim}" FontSize="12"/>
+                                    </Panel>
+                                </DockPanel>
+
+                                <!-- ══════════ QC VIEW ══════════
+                                     Grouped by category, collapsed. A run on a large
+                                     file produces well over a thousand findings; as a
+                                     flat list the handful that need a human are
+                                     invisible, so the default view is ~8 header lines
+                                     each carrying its own bulk action. -->
+                                <DockPanel IsVisible="{Binding IsQcTabActive}">
+                                    <Border DockPanel.Dock="Top"
+                                            BorderBrush="{DynamicResource BorderSubtle}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="12,4">
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="11"
+                                                       Foreground="{DynamicResource TextMuted}"
+                                                       Text="{Binding QcReviewCount, StringFormat={}{0} need a human decision}"/>
+                                            <Button Grid.Column="2" Classes="chip accent"
+                                                    IsVisible="{Binding HasQcFixable}"
+                                                    Command="{Binding QcFixAllMechanicalCommand}"
+                                                    ToolTip.Tip="{Binding [qc.tab.fixAll.tooltip], Source={x:Static loc:Loc.Instance}}">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <TextBlock Text="{Binding [qc.tab.fixAll], Source={x:Static loc:Loc.Instance}}"/>
+                                                    <TextBlock Text="{Binding QcFixableCount}"/>
+                                                </StackPanel>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                    <Panel>
+                                        <ListBox x:Name="QcListBox"
+                                                 ItemsSource="{Binding QcRows}"
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 SelectionMode="Multiple"
+                                                 KeyDown="OnQcListKeyDown">
+                                            <ListBox.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="{Binding [ctx.copy], Source={x:Static loc:Loc.Instance}}" Click="OnCopyQcRows"/>
+                                                    <MenuItem Header="{Binding [ctx.selectAll], Source={x:Static loc:Loc.Instance}}" Click="OnSelectAllQcRows"/>
+                                                </ContextMenu>
+                                            </ListBox.ContextMenu>
+                                            <ListBox.DataTemplates>
+                                                    <DataTemplate DataType="m:QcGroupItem">
+                                                        <!-- Category header: click anywhere to expand. -->
+                                                            <Border Background="Transparent" Padding="0,3"
+                                                                    PointerPressed="OnQcGroupHeaderPressed"
+                                                                    ToolTip.Tip="{Binding Hint}">
+                                                                <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto">
+                                                                    <TextBlock Text="{Binding ExpandGlyph}" Width="14"
+                                                                               FontSize="10" VerticalAlignment="Center"
+                                                                               Foreground="{DynamicResource TextDim}"/>
+                                                                    <TextBlock Grid.Column="1" Text="{Binding Glyph}"
+                                                                               Tag="{Binding SeverityName}" FontSize="13"
+                                                                               Width="20" HorizontalAlignment="Center"
+                                                                               VerticalAlignment="Center">
+                                                                        <TextBlock.Styles>
+                                                                            <Style Selector="TextBlock[Tag=Error]"><Setter Property="Foreground" Value="{DynamicResource DangerColor}"/></Style>
+                                                                            <Style Selector="TextBlock[Tag=Warning]"><Setter Property="Foreground" Value="{DynamicResource WarningColor}"/></Style>
+                                                                            <Style Selector="TextBlock[Tag=Info]"><Setter Property="Foreground" Value="{DynamicResource InfoColor}"/></Style>
+                                                                        </TextBlock.Styles>
+                                                                    </TextBlock>
+                                                                    <TextBlock Grid.Column="2" Text="{Binding Label}"
+                                                                               FontSize="11" FontWeight="Bold" Margin="6,0,10,0"
+                                                                               VerticalAlignment="Center"
+                                                                               Foreground="{DynamicResource TextPrimary}"/>
+                                                                    <TextBlock Grid.Column="3" Text="{Binding Hint}"
+                                                                               FontSize="11" VerticalAlignment="Center"
+                                                                               TextTrimming="CharacterEllipsis"
+                                                                               Foreground="{DynamicResource TextMuted}"/>
+                                                                    <TextBlock Grid.Column="4" Text="{Binding Count}"
+                                                                               FontSize="11" Margin="10,0"
+                                                                               VerticalAlignment="Center"
+                                                                               Foreground="{DynamicResource TextDim}"/>
+                                                                    <Button Grid.Column="5" Classes="subtle" Padding="8,2"
+                                                                            IsVisible="{Binding HasFixes}"
+                                                                            Click="OnQcGroupFixClick">
+                                                                        <StackPanel Orientation="Horizontal" Spacing="5">
+                                                                            <TextBlock Text="{Binding [problems.fix], Source={x:Static loc:Loc.Instance}}"/>
+                                                                            <TextBlock Text="{Binding FixableCount}" Opacity="0.7"/>
+                                                                        </StackPanel>
+                                                                    </Button>
+                                                                </Grid>
+                                                            </Border>
+                                                    </DataTemplate>
+
+                                                    <DataTemplate DataType="m:ProblemListItem">
+                                                                        <!-- Background="Transparent" is required: without it the
+                                                                             Grid has no hit-test surface and a double-click
+                                                                             anywhere except directly on a TextBlock was
+                                                                             swallowed, so half the row did nothing. -->
+                                                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto"
+                                                                              Background="Transparent"
+                                                                              Margin="32,0,0,0"
+                                                                              DoubleTapped="OnProblemItemDoubleTapped"
+                                                                              ToolTip.Tip="{Binding Tooltip}">
+                                                                            <TextBlock Text="{Binding Glyph}" Tag="{Binding SeverityName}"
+                                                                                       FontSize="12" VerticalAlignment="Center" Width="18">
+                                                                                <TextBlock.Styles>
+                                                                                    <Style Selector="TextBlock[Tag=Error]"><Setter Property="Foreground" Value="{DynamicResource DangerColor}"/></Style>
+                                                                                    <Style Selector="TextBlock[Tag=Warning]"><Setter Property="Foreground" Value="{DynamicResource WarningColor}"/></Style>
+                                                                                    <Style Selector="TextBlock[Tag=Info]"><Setter Property="Foreground" Value="{DynamicResource InfoColor}"/></Style>
+                                                                                </TextBlock.Styles>
+                                                                            </TextBlock>
+                                                                            <TextBlock Grid.Column="1" Text="{Binding Title}"
+                                                                                       FontSize="12" VerticalAlignment="Center"
+                                                                                       TextTrimming="CharacterEllipsis"
+                                                                                       Foreground="{DynamicResource TextPrimary}"/>
+                                                                            <TextBlock Grid.Column="2" Text="{Binding RowKey}"
+                                                                                       FontSize="11" VerticalAlignment="Center" Margin="10,0"
+                                                                                       Foreground="{DynamicResource TextDim}"
+                                                                                       FontFamily="{DynamicResource AppFontFamilyMono}"/>
+                                                                            <Button Grid.Column="3" Classes="subtle" Padding="8,2"
+                                                                                    IsVisible="{Binding HasFix}"
+                                                                                    Click="OnProblemFixClick"
+                                                                                    Content="{Binding [problems.fix], Source={x:Static loc:Loc.Instance}}"/>
+                                                                            <Button Grid.Column="4" Classes="subtle" Padding="8,2" Margin="4,0,0,0"
+                                                                                    Click="OnProblemGoClick"
+                                                                                    Content="{Binding [problems.go], Source={x:Static loc:Loc.Instance}}"/>
+                                                                        </Grid>
+                                                    </DataTemplate>
+                                            </ListBox.DataTemplates>
+                                        </ListBox>
+                                        <TextBlock IsVisible="{Binding QcGroupsEmpty}"
+                                                   Text="{Binding [qc.tab.empty], Source={x:Static loc:Loc.Instance}}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource TextDim}" FontSize="12"/>
+                                    </Panel>
+                                </DockPanel>
+
+                                <!-- ══════════ LOGS VIEW ══════════ -->
+                                <DockPanel IsVisible="{Binding IsLogsTabActive}">
+                                    <!-- Severity segmented filter -->
+                                    <Border DockPanel.Dock="Top"
+                                            BorderBrush="{DynamicResource BorderSubtle}"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="12,4">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <Button Classes="logTab" Classes.active="{Binding IsLogFilterAll}"
+                                                    Command="{Binding SetLogFilterAllCommand}"
+                                                    Content="{Binding [logs.filter.all], Source={x:Static loc:Loc.Instance}}"/>
+                                            <Button Classes="logTab" Classes.active="{Binding IsLogFilterInfo}"
+                                                    Command="{Binding SetLogFilterInfoCommand}"
+                                                    Content="{Binding [logs.filter.info], Source={x:Static loc:Loc.Instance}}"/>
+                                            <Button Classes="logTab" Classes.active="{Binding IsLogFilterWarning}"
+                                                    Command="{Binding SetLogFilterWarningCommand}"
+                                                    Content="{Binding [logs.filter.warning], Source={x:Static loc:Loc.Instance}}"/>
+                                            <Button Classes="logTab" Classes.active="{Binding IsLogFilterError}"
+                                                    Command="{Binding SetLogFilterErrorCommand}"
+                                                    Content="{Binding [logs.filter.error], Source={x:Static loc:Loc.Instance}}"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <ListBox x:Name="LogListBox"
+                                             ItemsSource="{Binding FilteredLogs}"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             SelectionMode="Multiple"
+                                             KeyDown="OnLogListKeyDown">
+                                        <ListBox.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="{Binding [ctx.copy], Source={x:Static loc:Loc.Instance}}" Click="OnCopyLogs"/>
+                                                <MenuItem Header="{Binding [ctx.selectAll], Source={x:Static loc:Loc.Instance}}" Click="OnSelectAllLogs"/>
+                                            </ContextMenu>
+                                        </ListBox.ContextMenu>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid ColumnDefinitions="80,110,*" Margin="12,2" Background="Transparent">
+                                                    <TextBlock Text="{Binding DisplayTimestamp}" Foreground="{DynamicResource TextDim}" FontSize="11" VerticalAlignment="Center"
+                                                               FontFamily="{DynamicResource AppFontFamilyMono}"/>
+                                                    <!-- The level in the interface language, coloured by level. It used to
+                                                         print the enum name: "Info" under 情報 / 警告 / エラー filter tabs.
+                                                         Three bound labels rather than a converter, so a live language
+                                                         switch re-reads them like every other string. -->
+                                                    <Panel Grid.Column="1" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding [logs.level.error], Source={x:Static loc:Loc.Instance}}" IsVisible="{Binding IsError}"
+                                                                   FontSize="11" FontWeight="Bold" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource DangerColor}"/>
+                                                        <TextBlock Text="{Binding [logs.level.warning], Source={x:Static loc:Loc.Instance}}" IsVisible="{Binding IsWarning}"
+                                                                   FontSize="11" FontWeight="Bold" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource WarningColor}"/>
+                                                        <TextBlock Text="{Binding [logs.level.info], Source={x:Static loc:Loc.Instance}}" IsVisible="{Binding IsInfo}"
+                                                                   FontSize="11" FontWeight="Bold" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource InfoColor}"/>
+                                                    </Panel>
+                                                    <TextBlock Grid.Column="2" Text="{Binding Message}" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource TextPrimary}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </DockPanel>
+                            </Panel>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+
+                <!-- ════════════════════════════════════════════════════════
+                     FIND BAR (Etap 9) — VS-style overlay anchored to the
+                     TOP-RIGHT of the DataGrid content area (below the filter
+                     bar, clear of the window chrome / min-max-close). Lives
+                     inside the content Grid so it never overlaps the header.
+                     IsVisible binds to IsFindBarOpen.
+                   ════════════════════════════════════════════════════════ -->
+                <c:FindBar x:Name="FindBarHost"/>
+            </Grid>
+        </DockPanel>
+
+        <!-- ════════════════════════════════════════════════════════
+             PROBLEM POPOVER (Etap 6) — Popup that floats above the
+             grid; layout-invisible host. Wired into the singleton
+             ProblemPopoverService from MainWindow.OnLoaded.
+           ════════════════════════════════════════════════════════ -->
+        <c:ProblemPopover x:Name="ProblemPopoverHost"/>
+
+        <!-- ════════════════════════════════════════════════════════
+             TOAST STACK (Etap 8) — bottom-right floating notifications,
+             anchored above the status bar. Items come from the
+             ToastService singleton. Background omitted intentionally:
+             a null brush lets pointer events fall through empty space
+             so the host does NOT steal clicks from the grid behind it;
+             only the actual toast pills (which have their own
+             ChromeBackground) receive hits.
+           ════════════════════════════════════════════════════════ -->
+        <c:ToastStack x:Name="ToastStackHost"/>
+        </Grid>
+    </Border>
+</Window>

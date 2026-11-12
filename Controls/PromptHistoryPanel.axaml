@@ -1,0 +1,88 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:SmartUnrealLocalization.Localization"
+             xmlns:c="using:SmartUnrealLocalization.Controls"
+             x:Class="SmartUnrealLocalization.Controls.PromptHistoryPanel"
+             Background="{DynamicResource WindowBackground}">
+
+    <DockPanel>
+        <!-- Header -->
+        <Border DockPanel.Dock="Top"
+                Background="{DynamicResource PanelBackground}"
+                BorderBrush="{DynamicResource BorderColor}"
+                BorderThickness="0,0,0,1" Height="32" Padding="12,0">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                <TextBlock Grid.Column="0" Classes="solHead"
+                           Text="{Binding [prompts.title], Source={x:Static loc:Loc.Instance}}"
+                           VerticalAlignment="Center"/>
+                <!-- The folder that holds the prompt files -->
+                <Button Grid.Column="2" Classes="solIcon" Click="OnOpenFolder"
+                        ToolTip.Tip="{Binding [prompts.openFolder], Source={x:Static loc:Loc.Instance}}">
+                    <Path Width="24" Height="24" RenderTransform="scale(0.5)" Margin="-6"
+                          Stroke="{DynamicResource TextMuted}" StrokeThickness="1.6"
+                          StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"
+                          Data="M5 19h14a1 1 0 0 0 1-1V10H4v8a1 1 0 0 0 1 1z M4 10V6a1 1 0 0 1 1-1h4l2 2h8a1 1 0 0 1 1 1v2"/>
+                </Button>
+                <Button Grid.Column="3" Classes="solIcon" Click="OnClosePanel"
+                        ToolTip.Tip="{Binding [prompts.close], Source={x:Static loc:Loc.Instance}}">
+                    <TextBlock Text="&#x2190;" FontSize="11"/>
+                </Button>
+            </Grid>
+        </Border>
+
+        <TextBlock DockPanel.Dock="Top" Classes="hint" Margin="14,10,14,8" TextWrapping="Wrap"
+                   Text="{Binding [prompts.hint], Source={x:Static loc:Loc.Instance}}"/>
+
+        <Grid>
+            <TextBlock x:Name="LblEmpty" Classes="hint" Margin="14,8" TextWrapping="Wrap"
+                       Text="{Binding [prompts.empty], Source={x:Static loc:Loc.Instance}}"/>
+
+            <!-- The list scrolls as a whole: several prompts can be open at once. -->
+            <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl x:Name="List" Margin="8,0,8,12">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="c:PromptHistoryItem">
+                            <Border BorderBrush="{DynamicResource BorderSubtle}" BorderThickness="0,0,0,1">
+                                <StackPanel>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Button Grid.Column="0" Classes="promptHead" Click="OnToggle">
+                                            <Grid ColumnDefinitions="Auto,*">
+                                                <!-- Chevron: right = closed, down = open -->
+                                                <Panel Grid.Column="0" Width="12" Height="12" Margin="0,2,6,0"
+                                                       VerticalAlignment="Top">
+                                                    <Path Width="24" Height="24" RenderTransform="scale(0.5)" Margin="-6"
+                                                          IsVisible="{Binding !IsExpanded}"
+                                                          Stroke="{DynamicResource TextMuted}" StrokeThickness="2"
+                                                          StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"
+                                                          Data="M9,5 L16,12 L9,19"/>
+                                                    <Path Width="24" Height="24" RenderTransform="scale(0.5)" Margin="-6"
+                                                          IsVisible="{Binding IsExpanded}"
+                                                          Stroke="{DynamicResource TextMuted}" StrokeThickness="2"
+                                                          StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"
+                                                          Data="M5,9 L12,16 L19,9"/>
+                                                </Panel>
+                                                <TextBlock Grid.Column="1" Text="{Binding Name}"
+                                                           FontSize="12" TextWrapping="Wrap"/>
+                                            </Grid>
+                                        </Button>
+                                        <Button Grid.Column="1" Classes="subtle" Click="OnCopy"
+                                                VerticalAlignment="Top" Margin="6,4,0,4" Padding="8,3" FontSize="11"
+                                                Content="{Binding [prompts.copy], Source={x:Static loc:Loc.Instance}}"
+                                                ToolTip.Tip="{Binding [prompts.copy.tooltip], Source={x:Static loc:Loc.Instance}}"/>
+                                    </Grid>
+                                    <!-- Read-only, so the text can be selected and copied in part. -->
+                                    <TextBox IsVisible="{Binding IsExpanded}"
+                                             Text="{Binding Text, Mode=OneWay}"
+                                             IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap"
+                                             FontFamily="Cascadia Mono, Consolas, Courier New" FontSize="12"
+                                             Margin="0,0,0,10"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </DockPanel>
+</UserControl>

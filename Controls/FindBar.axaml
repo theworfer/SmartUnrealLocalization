@@ -1,0 +1,196 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:SmartUnrealLocalization.ViewModels"
+             xmlns:loc="using:SmartUnrealLocalization.Localization"
+             x:Class="SmartUnrealLocalization.Controls.FindBar"
+             x:DataType="vm:MainWindowViewModel"
+             IsVisible="{Binding IsFindBarOpen}"
+             HorizontalAlignment="Right"
+             VerticalAlignment="Top"
+             Margin="0,8,16,0">
+
+    <UserControl.Styles>
+        <!-- Etap-11 follow-up: round the FindBar box + its controls a touch so it
+             reads as a styled app panel rather than a raw popup. Scoped to the
+             FindBar only — the flat aesthetic elsewhere is unchanged. -->
+        <Style Selector="Button.findNav /template/ ContentPresenter">
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        <Style Selector="ToggleButton.findChevron /template/ ContentPresenter">
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        <Style Selector="ToggleButton.findOption /template/ ContentPresenter">
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        <Style Selector="Button.findTag /template/ ContentPresenter">
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        <Style Selector="Button.subtle /template/ ContentPresenter">
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        <Style Selector="Button.primary /template/ ContentPresenter">
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        <Style Selector="TextBox.findInput">
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+    </UserControl.Styles>
+
+    <!-- VS-style overlay: top-right of the grid, vertical 3-row layout,
+         floats above content with a drop shadow. The whole control hides
+         when IsFindBarOpen is false (root IsVisible binding). -->
+    <Border Background="{DynamicResource ChromeBackground}"
+            BorderBrush="{DynamicResource BorderStrong}"
+            BorderThickness="1"
+            CornerRadius="6"
+            Padding="6,4"
+            MinWidth="420"
+            BoxShadow="0 6 16 0 #66000000">
+
+        <StackPanel Spacing="4">
+
+            <!-- ─────── ROW 1 — chevron toggle, find input, counter, nav, close ─────── -->
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto">
+
+                <!-- Chevron toggle: collapses / expands the Replace row. -->
+                <ToggleButton Grid.Column="0"
+                              Classes="findChevron"
+                              IsChecked="{Binding FindBarReplaceMode}"
+                              Width="20" Height="24"
+                              VerticalAlignment="Center"
+                              ToolTip.Tip="{Binding [find.toggleReplace], Source={x:Static loc:Loc.Instance}}">
+                    <TextBlock x:Name="ChevronGlyph"
+                               Text="&#x25B6;"
+                               FontSize="9"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </ToggleButton>
+
+                <!-- Find input — magnifier on the right via classed adorner.
+                     Enter = Find Next; Shift+Enter = Find Prev (KeyDown handler). -->
+                <TextBox Grid.Column="1"
+                         x:Name="FindInput"
+                         Classes="form findInput"
+                         Text="{Binding FindQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         PlaceholderText="{Binding [find.placeholder], Source={x:Static loc:Loc.Instance}}"
+                         MinWidth="220"
+                         Margin="4,0,0,0"
+                         KeyDown="OnFindInputKeyDown"/>
+
+                <!-- Counter — "3 / 27", "No matches", or "". -->
+                <TextBlock Grid.Column="2"
+                           Text="{Binding FindCounterLabel}"
+                           FontSize="11"
+                           Foreground="{DynamicResource TextMuted}"
+                           VerticalAlignment="Center"
+                           MinWidth="64"
+                           TextAlignment="Right"
+                           Margin="6,0,4,0"/>
+
+                <!-- Prev / Next -->
+                <Button Grid.Column="3"
+                        Classes="findNav"
+                        Command="{Binding FindPrevCommand}"
+                        ToolTip.Tip="{Binding [find.prev], Source={x:Static loc:Loc.Instance}}">
+                    <TextBlock Text="&#x25B2;" FontSize="10"/>
+                </Button>
+                <Button Grid.Column="4"
+                        Classes="findNav"
+                        Command="{Binding FindNextCommand}"
+                        ToolTip.Tip="{Binding [find.next], Source={x:Static loc:Loc.Instance}}">
+                    <TextBlock Text="&#x25BC;" FontSize="10"/>
+                </Button>
+
+                <!-- Dropdown menu (Column picker) -->
+                <Button Grid.Column="5"
+                        Classes="findNav"
+                        Margin="4,0,0,0"
+                        Click="OnColumnMenu"
+                        ToolTip.Tip="{Binding [find.columnPicker], Source={x:Static loc:Loc.Instance}}">
+                    <TextBlock Text="&#x22EE;" FontSize="14"/>
+                </Button>
+
+                <!-- Close -->
+                <Button Grid.Column="6"
+                        Classes="findNav"
+                        Command="{Binding CloseFindBarCommand}"
+                        ToolTip.Tip="{Binding [find.close], Source={x:Static loc:Loc.Instance}}">
+                    <TextBlock Text="&#x2715;" FontSize="11"/>
+                </Button>
+            </Grid>
+
+            <!-- ─────── ROW 2 — option toggles + column tag ─────── -->
+            <StackPanel Orientation="Horizontal" Spacing="2">
+                <!-- Indent under chevron column so toggles align with input. -->
+                <Border Width="24"/>
+                <ToggleButton Classes="findOption"
+                              IsChecked="{Binding FindMatchCase}"
+                              ToolTip.Tip="{Binding [find.matchCase], Source={x:Static loc:Loc.Instance}}">
+                    <TextBlock Text="Aa" FontSize="11"/>
+                </ToggleButton>
+                <ToggleButton Classes="findOption"
+                              IsChecked="{Binding FindWholeWord}"
+                              ToolTip.Tip="{Binding [find.wholeWord], Source={x:Static loc:Loc.Instance}}">
+                    <!-- TextDecorations via attribute (static Underline collection).
+                         The property-element form (<TextBlock.TextDecorations>
+                         <TextDecoration/>) NREs at runtime because TextDecorations
+                         defaults to null and XamlIl adds to the null collection. -->
+                    <TextBlock Text="ab" FontSize="11" FontWeight="Bold"
+                               TextDecorations="Underline"/>
+                </ToggleButton>
+                <ToggleButton Classes="findOption"
+                              IsChecked="{Binding FindUseRegex}"
+                              ToolTip.Tip="{Binding [find.useRegex], Source={x:Static loc:Loc.Instance}}">
+                    <TextBlock Text=".*" FontSize="11" FontWeight="Bold"/>
+                </ToggleButton>
+
+                <!-- Spacer -->
+                <Border Width="8"/>
+
+                <!-- "In: Target" tag — clicking opens the column dropdown. -->
+                <Button Classes="findTag"
+                        Click="OnColumnMenu"
+                        ToolTip.Tip="{Binding [find.columnPicker], Source={x:Static loc:Loc.Instance}}">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <TextBlock x:Name="ColumnTagLabel" FontSize="11" VerticalAlignment="Center"/>
+                        <TextBlock Text="&#x25BE;" FontSize="9" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource TextMuted}"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+            <!-- ─────── ROW 3 — replace input + buttons (only in replace mode) ─────── -->
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                  IsVisible="{Binding FindBarReplaceMode}">
+                <!-- Indent for alignment with row 1's chevron column. -->
+                <Border Grid.Column="0" Width="24"/>
+                <TextBox Grid.Column="1"
+                         x:Name="ReplaceInput"
+                         Classes="form findInput"
+                         Text="{Binding ReplaceQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         PlaceholderText="{Binding [find.replacePlaceholder], Source={x:Static loc:Loc.Instance}}"
+                         IsEnabled="{Binding IsReplaceEnabled}"
+                         ToolTip.Tip="{Binding ReplaceDisabledTooltip}"
+                         MinWidth="220"
+                         Margin="4,0,0,0"
+                         KeyDown="OnReplaceInputKeyDown"/>
+                <Button Grid.Column="2"
+                        Classes="subtle"
+                        Padding="6,2"
+                        Margin="6,0,0,0"
+                        Command="{Binding ReplaceNextCommand}"
+                        IsEnabled="{Binding IsReplaceEnabled}"
+                        ToolTip.Tip="{Binding [find.replaceOne], Source={x:Static loc:Loc.Instance}}"
+                        Content="{Binding [find.replaceOne], Source={x:Static loc:Loc.Instance}}"/>
+                <Button Grid.Column="3"
+                        Classes="primary"
+                        Padding="8,2"
+                        Margin="4,0,0,0"
+                        Command="{Binding ReplaceAllCommand}"
+                        IsEnabled="{Binding IsReplaceEnabled}"
+                        ToolTip.Tip="{Binding [find.replaceAll], Source={x:Static loc:Loc.Instance}}"
+                        Content="{Binding [find.replaceAll], Source={x:Static loc:Loc.Instance}}"/>
+            </Grid>
+        </StackPanel>
+    </Border>
+</UserControl>

@@ -1,0 +1,217 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:SmartUnrealLocalization.Localization"
+             x:Class="SmartUnrealLocalization.Controls.AiTranslatePanel"
+             Background="{DynamicResource WindowBackground}">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Panel header -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource PanelBackground}"
+                BorderBrush="{DynamicResource BorderColor}"
+                BorderThickness="0,0,0,1"
+                Height="32"
+                Padding="12,0">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0" Classes="solHead"
+                           Text="{Binding [ai.title], Source={x:Static loc:Loc.Instance}}"
+                           VerticalAlignment="Center"/>
+                <Button Grid.Column="2" Classes="solIcon"
+                        Click="OnClosePanel"
+                        ToolTip.Tip="{Binding [ai.close], Source={x:Static loc:Loc.Instance}}">
+                    <TextBlock Text="&#x2190;" FontSize="11"/>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Footer -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource PanelBackground}"
+                BorderBrush="{DynamicResource BorderColor}"
+                BorderThickness="0,1,0,0"
+                Padding="16,10">
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                <Button x:Name="BtnStop" Classes="primary"
+                        Background="{DynamicResource DangerColor}"
+                        Click="OnStop" IsEnabled="False">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="&#x25A0;" FontSize="11"/>
+                        <TextBlock Text="{Binding [ai.stop], Source={x:Static loc:Loc.Instance}}"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="BtnStart" Classes="primary" Click="OnStart">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="&#x25B6;" FontSize="11"/>
+                        <TextBlock Text="{Binding [ai.start], Source={x:Static loc:Loc.Instance}}"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="16" Margin="20,20,20,28">
+
+                <TextBlock Text="{Binding [ai.heading], Source={x:Static loc:Loc.Instance}}"
+                           FontSize="18" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimary}"/>
+                <TextBlock Classes="hint"
+                           Text="{Binding [ai.subtitle], Source={x:Static loc:Loc.Instance}}"/>
+
+                <!-- Scope -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{Binding [ai.section.scope], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="10">
+                            <RadioButton x:Name="RbAll"
+                                         Content="{Binding [ai.scope.all], Source={x:Static loc:Loc.Instance}}"
+                                         GroupName="scope" IsChecked="True"/>
+                            <RadioButton x:Name="RbUntranslated"
+                                         Content="{Binding [ai.scope.untranslated], Source={x:Static loc:Loc.Instance}}"
+                                         GroupName="scope"/>
+                            <RadioButton x:Name="RbSelected" GroupName="scope">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="{Binding [ai.scope.selected], Source={x:Static loc:Loc.Instance}}"/>
+                                    <!-- Live count, filled by RefreshSelectedScopeLabel. Digits
+                                         only, so it needs no translation and survives a language
+                                         switch that re-evaluates the label binding beside it. -->
+                                    <TextBlock x:Name="LblSelectedCount" Opacity="0.7"/>
+                                </StackPanel>
+                            </RadioButton>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Language pair -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{Binding [ai.section.langPair], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="12">
+                            <Grid ColumnDefinitions="*,Auto,*">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding [ai.langFrom], Source={x:Static loc:Loc.Instance}}" Classes="hint"/>
+                                    <ComboBox x:Name="CbFrom" HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Text="&#x2192;" VerticalAlignment="Center" FontSize="20"
+                                           Margin="12,14,12,0" Foreground="{DynamicResource TextDim}"/>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="{Binding [ai.langTo], Source={x:Static loc:Loc.Instance}}" Classes="hint"/>
+                                    <ComboBox x:Name="CbTo" HorizontalAlignment="Stretch"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{Binding [ai.batchSize], Source={x:Static loc:Loc.Instance}}"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimary}"/>
+                                <ComboBox x:Name="CbBatch" Width="90"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Translation Memory -->
+                <StackPanel Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{Binding [ai.section.tm], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                        <Button Grid.Column="1" Classes="subtle"
+                                Content="{Binding [ai.tm.clear], Source={x:Static loc:Loc.Instance}}"
+                                Click="OnClearTm"
+                                FontSize="11" Padding="8,2" VerticalAlignment="Center"/>
+                    </Grid>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="6">
+                            <CheckBox x:Name="ChkUseTm"
+                                      Content="{Binding [ai.tm.usePersistent], Source={x:Static loc:Loc.Instance}}"
+                                      IsChecked="True" Foreground="{DynamicResource TextPrimary}"
+                                      Click="OnTmCheckChanged"/>
+                            <CheckBox x:Name="ChkSaveTm"
+                                      Content="{Binding [ai.tm.savePersistent], Source={x:Static loc:Loc.Instance}}"
+                                      IsChecked="True" Foreground="{DynamicResource TextPrimary}"/>
+                            <CheckBox x:Name="ChkSessionTm"
+                                      Content="{Binding [ai.tm.session], Source={x:Static loc:Loc.Instance}}"
+                                      IsChecked="False" Foreground="{DynamicResource TextPrimary}"
+                                      Click="OnTmCheckChanged"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Reviewer comments -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{Binding [translate.section.comments], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="6">
+                            <CheckBox x:Name="ChkSendComments"
+                                      Content="{Binding [translate.sendComments], Source={x:Static loc:Loc.Instance}}"
+                                      IsChecked="True" Foreground="{DynamicResource TextPrimary}"/>
+                            <TextBlock Classes="hint"
+                                       Text="{Binding [translate.sendComments.hint], Source={x:Static loc:Loc.Instance}}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Extra context. Session memory (like the whole panel): survives
+                     panel close/reopen, resets to defaults-on-app-restart. Never
+                     written to config. -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{Binding [ai.section.context], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="6">
+                            <CheckBox x:Name="ChkKeyContext"
+                                      Content="{Binding [ai.ctx.sendKey], Source={x:Static loc:Loc.Instance}}"
+                                      IsChecked="False" Foreground="{DynamicResource TextPrimary}"/>
+                            <TextBlock Classes="hint"
+                                       Text="{Binding [ai.ctx.sendKey.hint], Source={x:Static loc:Loc.Instance}}"/>
+                            <CheckBox x:Name="ChkAltSource"
+                                      Content="{Binding [ai.ctx.altSource], Source={x:Static loc:Loc.Instance}}"
+                                      IsChecked="False" Foreground="{DynamicResource TextPrimary}"
+                                      Click="OnAltSourceToggled" Margin="0,4,0,0"/>
+                            <StackPanel x:Name="AltSourceOptions" IsVisible="False" Spacing="6" Margin="24,0,0,0">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button x:Name="BtnAltBrowse" Classes="subtle"
+                                            Content="{Binding [ai.ctx.browse], Source={x:Static loc:Loc.Instance}}"
+                                            Click="OnAltBrowse" FontSize="11" Padding="8,2"/>
+                                    <TextBlock x:Name="LblAltFile" Classes="hint" VerticalAlignment="Center"
+                                               Text="{Binding [ai.ctx.noFile], Source={x:Static loc:Loc.Instance}}"/>
+                                </StackPanel>
+                                <StackPanel x:Name="AltColumnRow" Orientation="Horizontal" Spacing="8" IsVisible="False">
+                                    <TextBlock Text="{Binding [ai.ctx.takeFrom], Source={x:Static loc:Loc.Instance}}"
+                                               VerticalAlignment="Center"
+                                               Foreground="{DynamicResource TextPrimary}"/>
+                                    <ComboBox x:Name="CbAltColumn" Width="110"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding [ai.ctx.refQuality], Source={x:Static loc:Loc.Instance}}"
+                                               VerticalAlignment="Center"
+                                               Foreground="{DynamicResource TextPrimary}"/>
+                                    <ComboBox x:Name="CbRefQuality" Width="170"/>
+                                </StackPanel>
+                                <TextBlock Classes="hint"
+                                           Text="{Binding [ai.ctx.altSource.hint], Source={x:Static loc:Loc.Instance}}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Custom prompt -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{Binding [ai.section.prompt], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <!-- Same fix as the QC panel: an outer ScrollViewer stopped the
+                             TextBox's own scroller from ever engaging, clipping long
+                             prompts out of reach. -->
+                        <TextBox x:Name="TbPrompt" Classes="form" AcceptsReturn="True" TextWrapping="Wrap"
+                                 MinHeight="90" MaxHeight="220"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 PlaceholderText="{Binding [ai.prompt.placeholder], Source={x:Static loc:Loc.Instance}}"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- Progress -->
+                <StackPanel Spacing="6">
+                    <ProgressBar x:Name="Progress" Minimum="0" Maximum="100" Value="0" Height="4"/>
+                    <TextBlock x:Name="LblProgress" Classes="hint"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

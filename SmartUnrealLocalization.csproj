@@ -1,0 +1,83 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <!-- The one place a release sets its number: About, crash reports and the MCP bundle read it. -->
+    <Version>1.0.0</Version>
+    <!-- Plain '1.0.0' in the file properties, without the commit hash the SDK appends. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <Product>Smart Unreal Localization</Product>
+    <Authors>theworfer</Authors>
+    <Company>theworfer</Company>
+    <Copyright>Copyright (c) 2026 theworfer</Copyright>
+    <Description>Editor for Unreal Engine .locres localization files with AI batch translation.</Description>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <!-- Sibling projects live in subfolders of the app project dir — keep them out of our globs. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);LocresIO\**;LocresIO.Tests\**;SmartUnrealLocalization.Tests\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <!-- Release ships no symbols: the SDK default (portable PDBs) made the publish
+       output ~100 MB heavier for a desktop app nobody debugs from the field. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
+  <!-- DebugType only covers OUR assemblies — the real 100 MB was native symbol
+       files shipped inside NuGet packages (libSkiaSharp.pdb 80 MB +
+       libHarfBuzzSharp.pdb 20 MB from Avalonia's Skia runtime). Strip every
+       .pdb from the Release publish set. -->
+  <Target Name="StripPdbsFromPublish" AfterTargets="ComputeFilesToPublish" Condition="'$(Configuration)' == 'Release'">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.Extension)' == '.pdb'" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <Folder Include="Models\" />
+    <AvaloniaResource Include="Assets\**" />
+    <!-- License attributions must travel with every build/publish. -->
+    <None Include="THIRD-PARTY-NOTICES.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <EmbeddedResource Include="Localization\strings.*.json" WithCulture="false" LogicalName="SmartUnrealLocalization.Localization.%(Filename)%(Extension)" />
+    <!-- Help → Licenses shows these from inside the exe, so they cannot go missing
+         when someone copies the exe out of the release folder. -->
+    <EmbeddedResource Include="LICENSE" LogicalName="SmartUnrealLocalization.Legal.LICENSE" />
+    <EmbeddedResource Include="THIRD-PARTY-NOTICES.txt" LogicalName="SmartUnrealLocalization.Legal.THIRD-PARTY-NOTICES.txt" />
+    <EmbeddedResource Include="licenses\*.txt" WithCulture="false" LogicalName="SmartUnrealLocalization.Legal.licenses.%(Filename)%(Extension)" />
+    <!-- Help → Documentation opens docs/ next to the exe. The release script puts
+         them in the zip; copying them to the build output makes the item work in
+         a development build too (it used to be greyed out there). -->
+    <None Update="docs\USER-GUIDE.md;docs\USER-GUIDE.uk.md;docs\FAQ.md;docs\TROUBLESHOOTING.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="LocresIO\LocresIO.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Lets the test project reach internal helpers (provider routing, the
+         shared placeholder patterns) without widening the public surface. -->
+    <InternalsVisibleTo Include="SmartUnrealLocalization.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.0.2" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.0.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.0.2" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.2" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.2" />
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.1" />
+    <PackageReference Include="CsvHelper" Version="33.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
+    <PackageReference Include="ModelContextProtocol" Version="2.0.0-preview.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.9" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:SmartUnrealLocalization.Localization"
+             xmlns:m="using:SmartUnrealLocalization.Models"
+             x:Class="SmartUnrealLocalization.Controls.CellExpandButton"
+             x:DataType="m:TranslationRow">
+
+    <Button Classes="cellAction"
+            Click="OnClick"
+            ToolTip.Tip="{Binding [cell.expand.tooltip], Source={x:Static loc:Loc.Instance}}">
+        <!-- Two stacked TextBlocks toggled by IsExpanded — keeps the layout
+             slot identical between collapsed/expanded so the button doesn't
+             jump when the user clicks. ▼ collapsed, ▲ expanded. -->
+        <Panel>
+            <TextBlock Text="▼" FontSize="9"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       IsVisible="{Binding !IsExpanded}"/>
+            <TextBlock Text="▲" FontSize="9"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       IsVisible="{Binding IsExpanded}"/>
+        </Panel>
+    </Button>
+</UserControl>

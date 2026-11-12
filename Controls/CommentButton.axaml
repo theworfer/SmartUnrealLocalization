@@ -1,0 +1,106 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:SmartUnrealLocalization.Localization"
+             xmlns:m="using:SmartUnrealLocalization.Models"
+             x:DataType="m:TranslationRow"
+             x:Class="SmartUnrealLocalization.Controls.CommentButton">
+
+    <UserControl.Styles>
+        <!-- Faint at rest (revealed on row hover via CommentIconOpacity); full on icon hover. -->
+        <Style Selector="Button.commentBtn:pointerover">
+            <Setter Property="Opacity" Value="1"/>
+        </Style>
+        <Style Selector="Button.commentBtn /template/ ContentPresenter">
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        <Style Selector="Button.commentBtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource HoverBackground}"/>
+        </Style>
+        <Style Selector="Path.noteOutline">
+            <Setter Property="Stroke" Value="{DynamicResource TextSecondary}"/>
+        </Style>
+    </UserControl.Styles>
+
+    <!-- Opacity = HasComment ? 1 : (rowHover ? 0.7 : 0); icon-hover → 1 (style above). -->
+    <Button Classes="cellAction commentBtn"
+            Opacity="{Binding CommentIconOpacity}"
+            Click="OnClick"
+            ToolTip.Tip="{Binding CommentTooltip, FallbackValue=''}">
+        <Grid Width="14" Height="14">
+            <!-- No comment: outline note bubble -->
+            <Path Classes="noteOutline" IsVisible="{Binding !HasComment}"
+                  Stretch="None" StrokeThickness="1.2"
+                  StrokeJoin="Round" StrokeLineCap="Round" Fill="Transparent"
+                  Data="M2,3 H12 A1.5,1.5 0 0 1 13.5,4.5 V9 A1.5,1.5 0 0 1 12,10.5 H6.5 L3.5,13 V10.5 H2 A1.5,1.5 0 0 1 0.5,9 V4.5 A1.5,1.5 0 0 1 2,3 Z M3,5.5 H10.5 M3,7.6 H8"/>
+            <!-- Has comment: filled accent bubble + cut-out text lines -->
+            <Grid IsVisible="{Binding HasComment}">
+                <Path Fill="{DynamicResource AccentColor}" Stretch="None"
+                      Data="M2,3 H12 A1.5,1.5 0 0 1 13.5,4.5 V9 A1.5,1.5 0 0 1 12,10.5 H6.5 L3.5,13 V10.5 H2 A1.5,1.5 0 0 1 0.5,9 V4.5 A1.5,1.5 0 0 1 2,3 Z"/>
+                <Path Stroke="{DynamicResource GridBackground}" StrokeThickness="1.1" StrokeLineCap="Round"
+                      Stretch="None" Data="M3,5.6 H10.5 M3,7.7 H8"/>
+            </Grid>
+        </Grid>
+
+        <Button.Flyout>
+            <Flyout Placement="BottomEdgeAlignedRight" Opened="OnFlyoutOpened" Closed="OnFlyoutClosed">
+                <Border Width="300"
+                        Background="{DynamicResource MenuFlyoutBackground}"
+                        BorderBrush="{DynamicResource BorderColor}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        BoxShadow="0 12 40 #2D000000, 0 4 12 #1A000000">
+                    <Grid RowDefinitions="Auto,*,Auto">
+                        <!-- Header -->
+                        <Border Grid.Row="0" Background="{DynamicResource WindowBackground}"
+                                BorderBrush="{DynamicResource BorderSubtle}" BorderThickness="0,0,0,1"
+                                CornerRadius="8,8,0,0" Padding="10,7">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <Path Grid.Column="0" VerticalAlignment="Center" Stretch="None"
+                                      Fill="{DynamicResource AccentColor}"
+                                      Data="M2,3 H12 A1.5,1.5 0 0 1 13.5,4.5 V9 A1.5,1.5 0 0 1 12,10.5 H6.5 L3.5,13 V10.5 H2 A1.5,1.5 0 0 1 0.5,9 V4.5 A1.5,1.5 0 0 1 2,3 Z"/>
+                                <TextBlock Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center"
+                                           Text="{Binding [comment.title], Source={x:Static loc:Loc.Instance}}"
+                                           FontSize="12" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimary}"/>
+                                <Button Grid.Column="2" Classes="cellAction" Click="OnCloseClick"
+                                        Width="18" Height="18" Padding="2">
+                                    <Path Width="9" Height="9" Stretch="None"
+                                          Stroke="{DynamicResource TextMuted}" StrokeThickness="1.3" StrokeLineCap="Round"
+                                          Data="M0.5,0.5 L8.5,8.5 M8.5,0.5 L0.5,8.5"/>
+                                </Button>
+                            </Grid>
+                        </Border>
+
+                        <!-- Body -->
+                        <TextBox Grid.Row="1" x:Name="Editor"
+                                 Classes="commentEditor"
+                                 AcceptsReturn="True" TextWrapping="Wrap"
+                                 MinHeight="76" MaxHeight="240"
+                                 Margin="8" Padding="2"
+                                 BorderThickness="0" Background="Transparent"
+                                 PlaceholderText="{Binding [comment.placeholder], Source={x:Static loc:Loc.Instance}}"
+                                 KeyDown="OnEditorKeyDown"/>
+
+                        <!-- Footer -->
+                        <Border Grid.Row="2" Background="{DynamicResource WindowBackground}"
+                                BorderBrush="{DynamicResource BorderSubtle}" BorderThickness="0,1,0,0"
+                                CornerRadius="0,0,8,8" Padding="10,7">
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                <Button Grid.Column="0" x:Name="DeleteBtn" Classes="ghost"
+                                        Click="OnDeleteClick"
+                                        IsVisible="{Binding HasComment}"
+                                        Foreground="{DynamicResource DangerColor}"
+                                        Content="{Binding [comment.delete], Source={x:Static loc:Loc.Instance}}"/>
+                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="0,0,8,0"
+                                           Text="{Binding [comment.saveHint], Source={x:Static loc:Loc.Instance}}"
+                                           FontSize="10.5" Foreground="{DynamicResource TextDim}"/>
+                                <Button Grid.Column="3" Classes="primary" Click="OnSaveClick"
+                                        Content="{Binding [comment.save], Source={x:Static loc:Loc.Instance}}"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Flyout>
+        </Button.Flyout>
+    </Button>
+</UserControl>

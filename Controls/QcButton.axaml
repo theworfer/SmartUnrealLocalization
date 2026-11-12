@@ -1,0 +1,118 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:SmartUnrealLocalization.Localization"
+             xmlns:m="using:SmartUnrealLocalization.Models"
+             x:DataType="m:TranslationRow"
+             x:Class="SmartUnrealLocalization.Controls.QcButton">
+
+    <UserControl.Styles>
+        <Style Selector="Button.qcBtn:pointerover">
+            <Setter Property="Opacity" Value="1"/>
+        </Style>
+        <Style Selector="Button.qcBtn /template/ ContentPresenter">
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+        <Style Selector="Button.qcBtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource HoverBackground}"/>
+        </Style>
+        <!-- Diff highlighting: removed words on the Before side, added on the After side. -->
+        <Style Selector="Border.diffChip">
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Background" Value="{DynamicResource PanelBackground2}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtle}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+    </UserControl.Styles>
+
+    <!-- Only rows with a live suggestion show the badge (QcIconOpacity = 0/1). -->
+    <Button Classes="cellAction qcBtn"
+            Opacity="{Binding QcIconOpacity}"
+            IsVisible="{Binding HasQcProposal}"
+            Click="OnClick"
+            ToolTip.Tip="{Binding [qc.badge.tooltip], Source={x:Static loc:Loc.Instance}}">
+        <Button.Flyout>
+            <Flyout Placement="Left" ShowMode="Transient"
+                    FlyoutPresenterClasses="qcDiff"
+                    Opened="OnFlyoutOpened">
+                <!-- Wide by design: the FULL difference must be visible.
+                     The presenter class above lifts Fluent's ~456 px cap; without
+                     it this width only produced a horizontal scrollbar. -->
+                <Border Width="900" Padding="14" Background="{DynamicResource WindowBackgroundElev}">
+                    <StackPanel Spacing="10">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <TextBlock Text="{Binding [qc.diff.title], Source={x:Static loc:Loc.Instance}}"
+                                       FontWeight="Bold" FontSize="13"
+                                       Foreground="{DynamicResource TextPrimary}"/>
+                            <Border Grid.Column="2" x:Name="SeverityChip" Padding="6,1"
+                                    Background="{DynamicResource BorderColor}">
+                                <TextBlock x:Name="LblSeverity" FontSize="10"
+                                           Foreground="{DynamicResource TextPrimary}"/>
+                            </Border>
+                        </Grid>
+
+                        <TextBlock x:Name="LblReason" TextWrapping="Wrap" FontSize="11"
+                                   Foreground="{DynamicResource TextMuted}"/>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding [qc.diff.before], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                            <Border Classes="diffChip">
+                                <!-- Horizontal scrolling MUST be disabled: with it on
+                                     (the default), the viewer measures the text with
+                                     infinite width, TextWrapping never engages, and the
+                                     diff becomes one long line behind a scrollbar. -->
+                                <ScrollViewer MaxHeight="260" VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Disabled">
+                                    <SelectableTextBlock x:Name="TxtBefore" TextWrapping="Wrap"
+                                                         Foreground="{DynamicResource TextPrimary}"/>
+                                </ScrollViewer>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Hidden for a flag-only finding: showing "Suggested" with
+                             text identical to Current only made the user hunt for a
+                             difference that does not exist. -->
+                        <StackPanel x:Name="AfterPane" Spacing="4">
+                            <TextBlock Text="{Binding [qc.diff.after], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                            <Border Classes="diffChip">
+                                <!-- Horizontal scrolling MUST be disabled: with it on
+                                     (the default), the viewer measures the text with
+                                     infinite width, TextWrapping never engages, and the
+                                     diff becomes one long line behind a scrollbar. -->
+                                <ScrollViewer MaxHeight="260" VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Disabled">
+                                    <SelectableTextBlock x:Name="TxtAfter" TextWrapping="Wrap"
+                                                         Foreground="{DynamicResource TextPrimary}"/>
+                                </ScrollViewer>
+                            </Border>
+                        </StackPanel>
+
+                        <TextBlock x:Name="LblStale" IsVisible="False" TextWrapping="Wrap" FontSize="11"
+                                   Foreground="{DynamicResource DangerColor}"
+                                   Text="{Binding [qc.diff.stale], Source={x:Static loc:Loc.Instance}}"/>
+
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                            <Button x:Name="BtnKeep" Classes="subtle" Click="OnKeep"
+                                    Content="{Binding [qc.keep], Source={x:Static loc:Loc.Instance}}"
+                                    ToolTip.Tip="{Binding [qc.keep.tooltip], Source={x:Static loc:Loc.Instance}}"/>
+                            <Button x:Name="BtnFix" Classes="primary" Click="OnFix"
+                                    Content="{Binding [qc.fix], Source={x:Static loc:Loc.Instance}}"
+                                    ToolTip.Tip="{Binding [qc.fix.tooltip], Source={x:Static loc:Loc.Instance}}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Flyout>
+        </Button.Flyout>
+
+        <!-- Magnifier-with-check badge: QC found something worth looking at. -->
+        <Grid Width="14" Height="14">
+            <Path Stroke="{DynamicResource WarningColor}" StrokeThickness="1.3"
+                  StrokeJoin="Round" StrokeLineCap="Round" Fill="Transparent" Stretch="None"
+                  Data="M6,1.5 A4.5,4.5 0 1 1 6,10.5 A4.5,4.5 0 1 1 6,1.5 Z M9.4,9.4 L13,13"/>
+            <Path Stroke="{DynamicResource WarningColor}" StrokeThickness="1.3"
+                  StrokeJoin="Round" StrokeLineCap="Round" Fill="Transparent" Stretch="None"
+                  Data="M3.8,6 L5.4,7.6 L8.2,4.4"/>
+        </Grid>
+    </Button>
+</UserControl>

@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Locres.IO</RootNamespace>
+    <AssemblyName>LocresIO</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <!-- Zero runtime dependencies by design: this library ships standalone on NuGet. -->
+
+    <!-- NuGet package metadata -->
+    <PackageId>LocresIO</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>theworfer</Authors>
+    <Description>Clean-room, zero-dependency .NET library for reading, writing, converting and merging Unreal Engine .locres localization files. All format versions (v0 Legacy – v3 CityHash64), byte-exact against the engine's own output, with translation overlays, version conversion and game-update merge.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>unreal;unreal-engine;locres;localization;translation;l10n</PackageTags>
+    <RepositoryUrl>https://github.com/theworfer/LocresIO</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/theworfer/LocresIO</PackageProjectUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="LocresIO.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="THIRD-PARTY-NOTICES.txt" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

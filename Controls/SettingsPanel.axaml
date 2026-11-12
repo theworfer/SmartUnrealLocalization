@@ -1,0 +1,385 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:SmartUnrealLocalization.Localization"
+             x:Class="SmartUnrealLocalization.Controls.SettingsPanel"
+             Background="{DynamicResource WindowBackground}">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Panel header -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource PanelBackground}"
+                BorderBrush="{DynamicResource BorderColor}"
+                BorderThickness="0,0,0,1"
+                Height="32"
+                Padding="12,0">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0" Classes="solHead"
+                           Text="{Binding [set.title], Source={x:Static loc:Loc.Instance}}"
+                           VerticalAlignment="Center"/>
+                <Button Grid.Column="2" Classes="solIcon"
+                        Click="OnClosePanel"
+                        ToolTip.Tip="{Binding [set.close], Source={x:Static loc:Loc.Instance}}">
+                    <TextBlock Text="&#x2190;" FontSize="11"/>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Footer -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource PanelBackground}"
+                BorderBrush="{DynamicResource BorderColor}"
+                BorderThickness="0,1,0,0"
+                Padding="16,10">
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                <Button Classes="subtle"
+                        Content="{Binding [prefs.cancel], Source={x:Static loc:Loc.Instance}}"
+                        Click="OnCancel"/>
+                <Button Classes="primary"
+                        Content="{Binding [prefs.save], Source={x:Static loc:Loc.Instance}}"
+                        Click="OnSave"/>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer x:Name="SettingsScroll" Grid.Row="1">
+            <StackPanel Spacing="18" Margin="20,20,20,28">
+                <TextBlock Text="{Binding [set.heading], Source={x:Static loc:Loc.Instance}}"
+                           FontSize="18" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimary}"/>
+                <TextBlock Classes="hint"
+                           Text="{Binding [set.subtitle], Source={x:Static loc:Loc.Instance}}"/>
+
+                <WrapPanel Margin="0,2,0,0">
+                    <Button Classes="settingsNav"
+                            Content="{Binding [set.section.aiProvider], Source={x:Static loc:Loc.Instance}}"
+                            Click="OnGoAiProvider"
+                            Margin="0,0,6,6"/>
+                    <Button Classes="settingsNav"
+                            Content="{Binding [set.section.editor], Source={x:Static loc:Loc.Instance}}"
+                            Click="OnGoEditor"
+                            Margin="0,0,6,6"/>
+                    <Button Classes="settingsNav"
+                            Content="{Binding [set.section.validation], Source={x:Static loc:Loc.Instance}}"
+                            Click="OnGoValidation"
+                            Margin="0,0,6,6"/>
+                    <Button Classes="settingsNav"
+                            Content="{Binding [set.section.files], Source={x:Static loc:Loc.Instance}}"
+                            Click="OnGoFiles"
+                            Margin="0,0,6,6"/>
+                    <Button Classes="settingsNav"
+                            Content="{Binding [set.section.language], Source={x:Static loc:Loc.Instance}}"
+                            Click="OnGoLanguage"
+                            Margin="0,0,6,6"/>
+                    <Button Classes="settingsNav"
+                            Content="{Binding [set.section.tm], Source={x:Static loc:Loc.Instance}}"
+                            Click="OnGoTm"
+                            Margin="0,0,6,6"/>
+                    <Button Classes="settingsNav"
+                            Content="{Binding [set.section.aiSpeed], Source={x:Static loc:Loc.Instance}}"
+                            Click="OnGoAiSpeed"
+                            Margin="0,0,6,6"/>
+                    <Button Classes="settingsNav"
+                            Content="{Binding [set.section.advanced], Source={x:Static loc:Loc.Instance}}"
+                            Click="OnGoAdvanced"
+                            Margin="0,0,6,6"/>
+                </WrapPanel>
+
+                <!-- AI Provider — Model + API Key + Base URL + Test Connection -->
+                <StackPanel x:Name="SectionAiProvider" Spacing="8">
+                    <TextBlock Text="{Binding [set.section.aiProvider], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="{Binding [set.modelName], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                            <TextBox x:Name="TbModelName" Classes="form"
+                                     PlaceholderText="{Binding [set.modelPlaceholder], Source={x:Static loc:Loc.Instance}}"/>
+
+                            <TextBlock Text="{Binding [set.apiKey], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11" Foreground="{DynamicResource TextMuted}"
+                                       Margin="0,4,0,0"/>
+                            <TextBox x:Name="TbApiKey" Classes="form" PasswordChar="&#x25CF;"/>
+
+                            <TextBlock Text="{Binding [set.baseUrl], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11" Foreground="{DynamicResource TextMuted}"
+                                       Margin="0,4,0,0"/>
+                            <TextBox x:Name="TbBaseUrl" Classes="form"
+                                     PlaceholderText="{Binding [set.baseUrlPlaceholder], Source={x:Static loc:Loc.Instance}}"/>
+
+                            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,4,0,0">
+                                <Button x:Name="BtnTestConnection" Classes="subtle"
+                                        Content="{Binding [set.testConnection], Source={x:Static loc:Loc.Instance}}"
+                                        Click="OnTestConnection"/>
+                                <TextBlock x:Name="LblTestStatus" Classes="hint"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Editor — autosave + show full key hashes -->
+                <StackPanel x:Name="SectionEditor" Spacing="8">
+                    <TextBlock Text="{Binding [set.section.editor], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="10">
+                            <CheckBox x:Name="ChkAutoSave"
+                                      Content="{Binding [set.autosave], Source={x:Static loc:Loc.Instance}}"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8" Margin="22,0,0,0">
+                                <TextBlock Text="{Binding [set.autosaveInterval], Source={x:Static loc:Loc.Instance}}"
+                                           Foreground="{DynamicResource TextMuted}"
+                                           VerticalAlignment="Center"/>
+                                <TextBox x:Name="TbAutoSaveInterval" Classes="form" Width="60"/>
+                                <TextBlock Text="{Binding [set.minutes], Source={x:Static loc:Loc.Instance}}"
+                                           Foreground="{DynamicResource TextMuted}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <CheckBox x:Name="ChkShowFullKeyHashes"
+                                      Content="{Binding [set.showFullKeyHashes], Source={x:Static loc:Loc.Instance}}"
+                                      Margin="0,4,0,0"/>
+                            <TextBlock Classes="hint" Margin="22,0,0,0"
+                                       Text="{Binding [set.showFullKeyHashesHint], Source={x:Static loc:Loc.Instance}}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Validation — the optional notes. Errors and warnings always run. -->
+                <StackPanel x:Name="SectionValidation" Spacing="8">
+                    <TextBlock Text="{Binding [set.section.validation], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="10">
+                            <TextBlock Classes="hint" TextWrapping="Wrap"
+                                       Text="{Binding [set.validation.hint], Source={x:Static loc:Loc.Instance}}"/>
+                            <CheckBox x:Name="ChkCheckWhitespace"
+                                      Content="{Binding [set.check.whitespace], Source={x:Static loc:Loc.Instance}}"/>
+                            <TextBlock Classes="hint" Margin="22,0,0,0" TextWrapping="Wrap"
+                                       Text="{Binding [set.check.whitespace.hint], Source={x:Static loc:Loc.Instance}}"/>
+                            <CheckBox x:Name="ChkCheckPunctuation"
+                                      Content="{Binding [set.check.punctuation], Source={x:Static loc:Loc.Instance}}"/>
+                            <CheckBox x:Name="ChkCheckLength"
+                                      Content="{Binding [set.check.length], Source={x:Static loc:Loc.Instance}}"/>
+                            <CheckBox x:Name="ChkCheckDuplicates"
+                                      Content="{Binding [set.check.duplicates], Source={x:Static loc:Loc.Instance}}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                <!-- Files — default export format + save path -->
+                <StackPanel x:Name="SectionFiles" Spacing="8">
+                    <TextBlock Text="{Binding [set.section.files], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="{Binding [set.defaultExportFormat], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                            <ComboBox x:Name="CbDefaultExportFormat" Width="220" HorizontalAlignment="Left">
+                                <ComboBoxItem Content=".locres (UE binary)"/>
+                                <ComboBoxItem Content=".po (gettext)"/>
+                                <ComboBoxItem Content=".csv"/>
+                            </ComboBox>
+                            <TextBlock Text="{Binding [set.saveAsBehavior], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11" Foreground="{DynamicResource TextMuted}"
+                                       Margin="0,4,0,0"/>
+                            <ComboBox x:Name="CbSaveAsBehavior" Width="320" HorizontalAlignment="Left">
+                                <ComboBoxItem Content="{Binding [set.saveAs.alwaysAsk], Source={x:Static loc:Loc.Instance}}"/>
+                                <ComboBoxItem Content="{Binding [set.saveAs.exportFolder], Source={x:Static loc:Loc.Instance}}"/>
+                                <ComboBoxItem Content="{Binding [set.saveAs.autosaveFolder], Source={x:Static loc:Loc.Instance}}"/>
+                            </ComboBox>
+                            <TextBlock Text="{Binding [set.exportPath], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11" Foreground="{DynamicResource TextMuted}"
+                                       Margin="0,4,0,0"/>
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <TextBox x:Name="TbExportPath" Classes="form" Margin="0,0,8,0"
+                                         PlaceholderText="{Binding [set.exportPathPlaceholder], Source={x:Static loc:Loc.Instance}}"/>
+                                <Button Grid.Column="1" Classes="subtle"
+                                        Content="{Binding [set.browse], Source={x:Static loc:Loc.Instance}}"
+                                        Click="OnBrowseExportPath" Margin="0,0,8,0"/>
+                                <Button Grid.Column="2" Classes="subtle"
+                                        Content="{Binding [set.openFolder], Source={x:Static loc:Loc.Instance}}"
+                                        Click="OnOpenExportFolder"/>
+                            </Grid>
+                            <TextBlock Text="{Binding [set.savePath], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11" Foreground="{DynamicResource TextMuted}"
+                                       Margin="0,4,0,0"/>
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <TextBox x:Name="TbAutoSavePath" Classes="form" Margin="0,0,8,0"
+                                         PlaceholderText="{Binding [set.savePathPlaceholder], Source={x:Static loc:Loc.Instance}}"/>
+                                <Button Grid.Column="1" Classes="subtle"
+                                        Content="{Binding [set.browse], Source={x:Static loc:Loc.Instance}}"
+                                        Click="OnBrowseAutoSavePath" Margin="0,0,8,0"/>
+                                <Button Grid.Column="2" Classes="subtle"
+                                        Content="{Binding [set.openFolder], Source={x:Static loc:Loc.Instance}}"
+                                        Click="OnOpenAutoSaveFolder"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Interface language -->
+                <StackPanel x:Name="SectionLanguage" Spacing="8">
+                    <TextBlock Text="{Binding [set.section.language], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <TextBlock Text="{Binding [prefs.language], Source={x:Static loc:Loc.Instance}}"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource TextPrimary}"/>
+                            <ComboBox x:Name="CbLanguage" Width="180"/>
+                        </StackPanel>
+                    </Border>
+                    <!-- Accent colour: one pick for both themes; the shades each theme
+                         needs are derived from it (Services/AccentPalette). It applies
+                         as it is picked, like the theme toggle. -->
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <TextBlock Text="{Binding [set.accent], Source={x:Static loc:Loc.Instance}}"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimary}"/>
+                                <Button x:Name="BtnAccent" Classes="accentSwatch"
+                                        ToolTip.Tip="{Binding [set.accent.pick], Source={x:Static loc:Loc.Instance}}">
+                                    <Ellipse Width="22" Height="22"
+                                             Fill="{DynamicResource AccentColor}"
+                                             Stroke="{DynamicResource BorderColor}" StrokeThickness="1"/>
+                                    <Button.Flyout>
+                                        <Flyout Placement="BottomEdgeAlignedLeft" Opened="OnAccentPickerOpened" Closed="OnAccentPickerClosed">
+                                            <StackPanel Width="250" Spacing="8">
+                                                <WrapPanel x:Name="AccentPresets"/>
+                                                <TextBlock Classes="hint"
+                                                           Text="{Binding [set.accent.hue], Source={x:Static loc:Loc.Instance}}"/>
+                                                <Border x:Name="AccentHueStrip" Height="8"/>
+                                                <Slider x:Name="SlAccentHue" Minimum="0" Maximum="359"
+                                                        ValueChanged="OnAccentSliderChanged"/>
+                                                <TextBlock Classes="hint"
+                                                           Text="{Binding [set.accent.saturation], Source={x:Static loc:Loc.Instance}}"/>
+                                                <Slider x:Name="SlAccentSaturation" Minimum="0" Maximum="100"
+                                                        ValueChanged="OnAccentSliderChanged"/>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBox x:Name="TbAccentHex" Classes="form" Width="96"
+                                                             MaxLength="7"
+                                                             KeyDown="OnAccentHexKeyDown" LostFocus="OnAccentHexCommitted"/>
+                                                    <Ellipse x:Name="AccentPreview" Width="22" Height="22"
+                                                             Fill="{DynamicResource AccentColor}" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                                <Button Classes="subtle" Click="OnAccentDefault" VerticalAlignment="Center"
+                                        Content="{Binding [set.accent.default], Source={x:Static loc:Loc.Instance}}"/>
+                            </StackPanel>
+                            <TextBlock Classes="hint" TextWrapping="Wrap"
+                                       Text="{Binding [set.accent.hint], Source={x:Static loc:Loc.Instance}}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Translation Memory -->
+                <StackPanel x:Name="SectionTm" Spacing="8">
+                    <TextBlock Text="{Binding [set.section.tm], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="10">
+                            <CheckBox x:Name="ChkTM"
+                                      Content="{Binding [set.tm.enable], Source={x:Static loc:Loc.Instance}}"/>
+                            <TextBlock Classes="hint"
+                                       Text="{Binding [set.tm.enableHint], Source={x:Static loc:Loc.Instance}}"/>
+                            <TextBlock Text="{Binding [set.tm.glossaryTitle], Source={x:Static loc:Loc.Instance}}"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimary}"
+                                       Margin="0,4,0,0"/>
+                            <TextBox x:Name="TbGlossary" Classes="form" Height="70" AcceptsReturn="True"
+                                     PlaceholderText="{Binding [set.tm.glossaryPlaceholder], Source={x:Static loc:Loc.Instance}}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- AI Speed -->
+                <StackPanel x:Name="SectionAiSpeed" Spacing="8">
+                    <TextBlock Text="{Binding [set.section.aiSpeed], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="10">
+                            <CheckBox x:Name="ChkCaching"
+                                      Content="{Binding [set.speed.caching], Source={x:Static loc:Loc.Instance}}"/>
+                            <TextBlock Classes="hint"
+                                       Text="{Binding [set.speed.cachingHint], Source={x:Static loc:Loc.Instance}}"/>
+                            <CheckBox x:Name="ChkParallel"
+                                      Content="{Binding [set.speed.parallel], Source={x:Static loc:Loc.Instance}}"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{Binding [set.speed.maxConcurrent], Source={x:Static loc:Loc.Instance}}"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBox x:Name="TbMaxConcurrent" Classes="form" Width="60"/>
+                            </StackPanel>
+                            <TextBlock Classes="hint"
+                                       Foreground="{DynamicResource DangerColor}"
+                                       Text="{Binding [set.speed.parallelHint], Source={x:Static loc:Loc.Instance}}"/>
+                            <CheckBox x:Name="ChkAutoRetry"
+                                      Content="{Binding [set.speed.autoRetry], Source={x:Static loc:Loc.Instance}}"
+                                      Margin="0,4,0,0"/>
+                            <TextBlock Classes="hint"
+                                       Text="{Binding [set.speed.autoRetryHint], Source={x:Static loc:Loc.Instance}}"/>
+                            <CheckBox x:Name="ChkMinDelay"
+                                      Content="{Binding [set.speed.minDelay], Source={x:Static loc:Loc.Instance}}"
+                                      Margin="0,4,0,0"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{Binding [set.speed.minDelayMs], Source={x:Static loc:Loc.Instance}}"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBox x:Name="TbMinDelayMs" Classes="form" Width="60"/>
+                            </StackPanel>
+                            <TextBlock Classes="hint"
+                                       Text="{Binding [set.speed.minDelayHint], Source={x:Static loc:Loc.Instance}}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- MCP Server -->
+                <StackPanel x:Name="SectionMcp" Spacing="8">
+                    <TextBlock Text="{Binding [set.section.mcp], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="10">
+                            <CheckBox x:Name="ChkMcpServer"
+                                      Content="{Binding [set.mcp.enable], Source={x:Static loc:Loc.Instance}}"/>
+                            <TextBlock Classes="hint" TextWrapping="Wrap"
+                                       Text="{Binding [set.mcp.hint], Source={x:Static loc:Loc.Instance}}"/>
+                            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,4,0,0">
+                                <Button x:Name="BtnMcpBundle" Classes="subtle"
+                                        Content="{Binding [set.mcp.bundle], Source={x:Static loc:Loc.Instance}}"
+                                        Click="OnCreateMcpBundle"/>
+                                <TextBlock x:Name="LblMcpBundle" Classes="hint" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Classes="hint" TextWrapping="Wrap"
+                                       Text="{Binding [set.mcp.bundleHint], Source={x:Static loc:Loc.Instance}}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Advanced. Last on purpose: everything here changes a default
+                     the app is otherwise confident about, so it should be reached
+                     deliberately (Tools -> Advanced settings jumps straight here). -->
+                <StackPanel x:Name="SectionAdvanced" Spacing="8">
+                    <TextBlock Text="{Binding [set.section.advanced], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="10">
+                            <TextBlock Classes="hint" TextWrapping="Wrap"
+                                       Text="{Binding [set.advanced.hint], Source={x:Static loc:Loc.Instance}}"/>
+                            <CheckBox x:Name="ChkMergeKeyOnly"
+                                      Content="{Binding [set.advanced.mergeKeyOnly], Source={x:Static loc:Loc.Instance}}"/>
+                            <TextBlock Classes="hint" TextWrapping="Wrap"
+                                       Text="{Binding [set.advanced.mergeKeyOnly.hint], Source={x:Static loc:Loc.Instance}}"/>
+                        </StackPanel>
+                    </Border>
+                    <!-- Reset cache: destructive, so it sits last, says exactly what
+                         it deletes, and asks twice. -->
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="10">
+                            <TextBlock Classes="hint" TextWrapping="Wrap"
+                                       Text="{Binding [set.reset.hint], Source={x:Static loc:Loc.Instance}}"/>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <Button x:Name="BtnResetCache" Classes="subtle"
+                                        Content="{Binding [set.reset.button], Source={x:Static loc:Loc.Instance}}"
+                                        Click="OnResetCache"/>
+                                <TextBlock x:Name="LblResetCache" Classes="hint" VerticalAlignment="Center"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

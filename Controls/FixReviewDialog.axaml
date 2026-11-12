@@ -1,0 +1,69 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:SmartUnrealLocalization.Controls"
+        xmlns:loc="using:SmartUnrealLocalization.Localization"
+        x:Class="SmartUnrealLocalization.Controls.FixReviewDialog"
+        x:DataType="c:FixReviewDialog"
+        Width="880" Height="640"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Background="{DynamicResource WindowBackground}"
+        WindowDecorations="None">
+
+    <!-- Every change a fix would make, before it is made: the user sees both
+         sides with the changed words highlighted, unticks what they do not want,
+         and the rest is applied as ONE undo step. -->
+    <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+        <DockPanel>
+            <c:DialogTitleBar DockPanel.Dock="Top" x:Name="TitleBar"/>
+
+            <StackPanel DockPanel.Dock="Top" Margin="20,14,20,8" Spacing="4">
+                <TextBlock x:Name="CountText" FontSize="13" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimary}"/>
+                <TextBlock Classes="hint" TextWrapping="Wrap"
+                           Text="{Binding [fixReview.hint], Source={x:Static loc:Loc.Instance}}"/>
+                <TextBlock x:Name="RefusedText" Classes="hint" TextWrapping="Wrap"
+                           Foreground="{DynamicResource WarningColor}"/>
+            </StackPanel>
+
+            <Grid DockPanel.Dock="Bottom" Margin="20,10,20,16" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+                <Button Grid.Column="0" Classes="subtle" Click="OnSelectAll"
+                        Content="{Binding [fixReview.selectAll], Source={x:Static loc:Loc.Instance}}"/>
+                <Button Grid.Column="1" Classes="subtle" Margin="6,0,0,0" Click="OnSelectNone"
+                        Content="{Binding [fixReview.selectNone], Source={x:Static loc:Loc.Instance}}"/>
+                <Button Grid.Column="3" Classes="subtle" Margin="0,0,8,0" Click="OnCancel"
+                        Content="{Binding [common.cancel], Source={x:Static loc:Loc.Instance}}"/>
+                <Button Grid.Column="4" x:Name="BtnApply" Classes="primary" Click="OnApply"/>
+            </Grid>
+
+            <ListBox x:Name="ItemsList" Margin="20,0" Background="Transparent"
+                     BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="c:FixReviewItem">
+                        <Grid ColumnDefinitions="Auto,*" Margin="4,6">
+                            <CheckBox IsChecked="{Binding Include}" VerticalAlignment="Top"/>
+                            <StackPanel Grid.Column="1" Spacing="4" Margin="4,2,0,0">
+                                <TextBlock FontSize="11" Foreground="{DynamicResource TextDim}">
+                                    <Run Text="{Binding Key}" FontFamily="{DynamicResource AppFontFamilyMono}"/><Run Text="  "/><Run Text="{Binding Labels}"/>
+                                </TextBlock>
+                                <Grid ColumnDefinitions="64,*" RowDefinitions="Auto,Auto">
+                                    <TextBlock Text="{Binding [fixReview.before], Source={x:Static loc:Loc.Instance}}"
+                                               FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                                    <c:DiffText Grid.Column="1" OldText="{Binding Before}" NewText="{Binding After}"
+                                                ShowAfter="False" TextWrapping="Wrap" FontSize="12"
+                                                Foreground="{DynamicResource TextPrimary}"/>
+                                    <TextBlock Grid.Row="1" Text="{Binding [fixReview.after], Source={x:Static loc:Loc.Instance}}"
+                                               FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,4,0,0"/>
+                                    <c:DiffText Grid.Row="1" Grid.Column="1" OldText="{Binding Before}" NewText="{Binding After}"
+                                                ShowAfter="True" TextWrapping="Wrap" FontSize="12" Margin="0,4,0,0"
+                                                Foreground="{DynamicResource TextPrimary}"/>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+    </Border>
+</Window>

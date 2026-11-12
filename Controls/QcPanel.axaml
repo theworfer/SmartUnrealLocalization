@@ -1,0 +1,281 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:SmartUnrealLocalization.Localization"
+             xmlns:c="using:SmartUnrealLocalization.Controls"
+             x:Class="SmartUnrealLocalization.Controls.QcPanel"
+             Background="{DynamicResource WindowBackground}">
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.qcCount">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="8,0,0,0"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Header -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource PanelBackground}"
+                BorderBrush="{DynamicResource BorderColor}"
+                BorderThickness="0,0,0,1" Height="32" Padding="12,0">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0" Classes="solHead"
+                           Text="{Binding [qc.title], Source={x:Static loc:Loc.Instance}}"
+                           VerticalAlignment="Center"/>
+                <Button Grid.Column="2" Classes="solIcon" Click="OnClosePanel"
+                        ToolTip.Tip="{Binding [ai.close], Source={x:Static loc:Loc.Instance}}">
+                    <TextBlock Text="&#x2190;" FontSize="11"/>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Footer: last run + report -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource PanelBackground}"
+                BorderBrush="{DynamicResource BorderColor}"
+                BorderThickness="0,1,0,0" Padding="16,10">
+            <StackPanel Spacing="8">
+                <TextBlock x:Name="LblProgress" FontSize="11" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextMuted}"/>
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                    <Button x:Name="BtnReport" Classes="subtle" Click="OnExportReport"
+                            Content="{Binding [qc.report], Source={x:Static loc:Loc.Instance}}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="16" Margin="20,20,20,28">
+
+                <TextBlock Text="{Binding [qc.heading], Source={x:Static loc:Loc.Instance}}"
+                           FontSize="16" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimary}"/>
+                <TextBlock Classes="hint" TextWrapping="Wrap"
+                           Text="{Binding [qc.subtitle], Source={x:Static loc:Loc.Instance}}"/>
+
+                <!-- Files under review -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{Binding [qc.section.files], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="10">
+                            <!-- 1. The file under review = the ACTIVE TAB, named plainly.
+                                 The old card said "Result under review" and then asked
+                                 "Original is in:", which read as two different claims
+                                 about the same file and misled the user. -->
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="{Binding [qc.file.reviewing], Source={x:Static loc:Loc.Instance}}"
+                                           FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                                <TextBlock x:Name="LblResultFile" FontWeight="SemiBold" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBlock x:Name="LblFileLayout" Classes="hint" TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                            <!-- 2. WHERE in that file the translation under review sits.
+                                 This is about the RESULT, not the original. -->
+                            <!-- Hidden when the file has no Target: there is nothing
+                                 to choose between, and offering the choice made the
+                                 user think a second column existed somewhere. -->
+                            <StackPanel x:Name="ResultColumnRow" Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{Binding [qc.file.resultCol], Source={x:Static loc:Loc.Instance}}"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimary}"/>
+                                <ComboBox x:Name="CbResultColumn" Width="150" SelectionChanged="OnResultColumnChanged"/>
+                            </StackPanel>
+
+                            <!-- 3. The original. Required when the active file holds only
+                                 the result (every .locres, and source-only CSV/PO). -->
+                            <StackPanel Spacing="6" Margin="0,4,0,0">
+                                <TextBlock x:Name="LblOriginalRole" FontSize="11"
+                                           TextWrapping="Wrap" Foreground="{DynamicResource TextMuted}"/>
+                                <StackPanel x:Name="OriginalFileRow" Spacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button x:Name="BtnPickOriginal" Classes="subtle"
+                                                Content="{Binding [ai.ctx.browse], Source={x:Static loc:Loc.Instance}}"
+                                                Click="OnPickOriginal" FontSize="11" Padding="8,2"/>
+                                        <Button x:Name="BtnClearOriginal" Classes="subtle"
+                                                Content="{Binding [qc.file.clear], Source={x:Static loc:Loc.Instance}}"
+                                                Click="OnClearOriginal" FontSize="11" Padding="8,2" IsVisible="False"/>
+                                        <TextBlock x:Name="LblOriginalFile" Classes="hint" VerticalAlignment="Center"
+                                                   Text="{Binding [ai.ctx.noFile], Source={x:Static loc:Loc.Instance}}"/>
+                                    </StackPanel>
+                                    <StackPanel x:Name="OriginalColumnRow" Orientation="Horizontal" Spacing="8" IsVisible="False">
+                                        <TextBlock Text="{Binding [ai.ctx.takeFrom], Source={x:Static loc:Loc.Instance}}"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource TextPrimary}"/>
+                                        <ComboBox x:Name="CbOriginalFileColumn" Width="110"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="LblOriginalMatch" Classes="hint" TextWrapping="Wrap" IsVisible="False"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- 4. Optional extra language — context for the AI only. -->
+                            <StackPanel Spacing="6" Margin="0,4,0,0">
+                                <TextBlock Text="{Binding [qc.file.reference], Source={x:Static loc:Loc.Instance}}"
+                                           FontSize="11" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextMuted}"/>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button x:Name="BtnPickReference" Classes="subtle"
+                                            Content="{Binding [ai.ctx.browse], Source={x:Static loc:Loc.Instance}}"
+                                            Click="OnPickReference" FontSize="11" Padding="8,2"/>
+                                    <Button x:Name="BtnClearReference" Classes="subtle"
+                                            Content="{Binding [qc.file.clear], Source={x:Static loc:Loc.Instance}}"
+                                            Click="OnClearReference" FontSize="11" Padding="8,2" IsVisible="False"/>
+                                    <TextBlock x:Name="LblReferenceFile" Classes="hint" VerticalAlignment="Center"
+                                               Text="{Binding [ai.ctx.noFile], Source={x:Static loc:Loc.Instance}}"/>
+                                </StackPanel>
+                                <StackPanel x:Name="ReferenceColumnRow" Orientation="Horizontal" Spacing="8" IsVisible="False">
+                                    <TextBlock Text="{Binding [ai.ctx.takeFrom], Source={x:Static loc:Loc.Instance}}"
+                                               VerticalAlignment="Center"
+                                               Foreground="{DynamicResource TextPrimary}"/>
+                                    <ComboBox x:Name="CbReferenceColumn" Width="110"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Scope -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{Binding [qc.section.scope], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="8">
+                            <RadioButton x:Name="RbCheckAll" GroupName="qcScope" IsChecked="True" Click="OnScopeChanged"
+                                         Content="{Binding [qc.scope.all], Source={x:Static loc:Loc.Instance}}"/>
+                            <RadioButton x:Name="RbCheckSelected" GroupName="qcScope" Click="OnScopeChanged"
+                                         Content="{Binding [qc.scope.selected], Source={x:Static loc:Loc.Instance}}"/>
+                            <TextBlock Classes="hint" TextWrapping="Wrap"
+                                       Text="{Binding [qc.scope.hint], Source={x:Static loc:Loc.Instance}}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Language pair (the AI review needs both) -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{Binding [qc.section.lang], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <Grid ColumnDefinitions="*,Auto,*">
+                            <StackPanel>
+                                <TextBlock Text="{Binding [ai.langFrom], Source={x:Static loc:Loc.Instance}}" Classes="hint"/>
+                                <ComboBox x:Name="CbFrom" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" Text="&#x2192;" VerticalAlignment="Center" FontSize="18"
+                                       Margin="12,14,12,0" Foreground="{DynamicResource TextDim}"/>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="{Binding [ai.langTo], Source={x:Static loc:Loc.Instance}}" Classes="hint"/>
+                                <ComboBox x:Name="CbTo" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+
+                <!-- QC guidance prompt (sent to the AI with every batch; kept per session) -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{Binding [qc.section.prompt], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="6">
+                            <!-- The TextBox scrolls ITSELF. Wrapping it in an outer
+                                 ScrollViewer measured the box with infinite height,
+                                 so its own scroller never engaged and everything past
+                                 the cap was clipped and unreachable — a long prompt
+                                 looked truncated even though the text was all there. -->
+                            <TextBox x:Name="TbPrompt" Classes="form" AcceptsReturn="True" TextWrapping="Wrap"
+                                     MinHeight="90" MaxHeight="220"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                     PlaceholderText="{Binding [qc.prompt.placeholder], Source={x:Static loc:Loc.Instance}}"/>
+                            <TextBlock Classes="hint" TextWrapping="Wrap"
+                                       Text="{Binding [qc.prompt.hint], Source={x:Static loc:Loc.Instance}}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- AI review -->
+                <StackPanel Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{Binding [qc.section.ai], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                        <Button Grid.Column="1" Classes="subtle" Click="OnAiSettings"
+                                Content="{Binding [qc.ai.settings], Source={x:Static loc:Loc.Instance}}"
+                                FontSize="11" Padding="8,2" VerticalAlignment="Center"/>
+                    </Grid>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="10">
+                            <TextBlock Classes="hint" TextWrapping="Wrap"
+                                       Text="{Binding [qc.ai.hint], Source={x:Static loc:Loc.Instance}}"/>
+
+                            <!-- Which rows the review sends. Every row in scope goes,
+                                 minus what these switches keep out; each one shows
+                                 how many rows it skips, so the cost is visible before
+                                 anything is sent. -->
+                            <TextBlock Text="{Binding [qc.ai.rows], Source={x:Static loc:Loc.Instance}}"
+                                       FontWeight="SemiBold" FontSize="12"
+                                       Foreground="{DynamicResource TextPrimary}" Margin="0,2,0,0"/>
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                                <CheckBox x:Name="ChkSkipEmpty" Grid.Row="0" Click="OnSkipToggled">
+                                    <TextBlock TextWrapping="Wrap" Text="{Binding [qc.ai.skip.empty], Source={x:Static loc:Loc.Instance}}"/>
+                                </CheckBox>
+                                <TextBlock x:Name="LblSkipEmpty" Grid.Row="0" Grid.Column="1" Classes="qcCount"/>
+                                <CheckBox x:Name="ChkSkipAutoCarried" Grid.Row="1" Click="OnSkipToggled">
+                                    <TextBlock TextWrapping="Wrap" Text="{Binding [qc.ai.skip.autoCarried], Source={x:Static loc:Loc.Instance}}"/>
+                                </CheckBox>
+                                <TextBlock x:Name="LblSkipAutoCarried" Grid.Row="1" Grid.Column="1" Classes="qcCount"/>
+                                <CheckBox x:Name="ChkSkipIdentical" Grid.Row="2" Click="OnSkipToggled">
+                                    <TextBlock TextWrapping="Wrap" Text="{Binding [qc.ai.skip.identical], Source={x:Static loc:Loc.Instance}}"/>
+                                </CheckBox>
+                                <TextBlock x:Name="LblSkipIdentical" Grid.Row="2" Grid.Column="1" Classes="qcCount"/>
+                                <CheckBox x:Name="ChkSkipApproved" Grid.Row="3" Click="OnSkipToggled">
+                                    <TextBlock TextWrapping="Wrap" Text="{Binding [qc.ai.skip.approved], Source={x:Static loc:Loc.Instance}}"/>
+                                </CheckBox>
+                                <TextBlock x:Name="LblSkipApproved" Grid.Row="3" Grid.Column="1" Classes="qcCount"/>
+                                <CheckBox x:Name="ChkOnlyFlagged" Grid.Row="4" Click="OnSkipToggled">
+                                    <TextBlock TextWrapping="Wrap" Text="{Binding [qc.ai.skip.onlyFlagged], Source={x:Static loc:Loc.Instance}}"/>
+                                </CheckBox>
+                                <TextBlock x:Name="LblOnlyFlagged" Grid.Row="4" Grid.Column="1" Classes="qcCount"/>
+                            </Grid>
+                            <TextBlock x:Name="LblRowsTotal" FontSize="11.5" FontWeight="SemiBold" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource AccentColor}"/>
+                            <TextBlock Classes="hint" TextWrapping="Wrap"
+                                       Text="{Binding [qc.ai.rowsHint], Source={x:Static loc:Loc.Instance}}"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button x:Name="BtnRunAi" Classes="primary" Click="OnRunAi"
+                                        Content="{Binding [qc.ai.run], Source={x:Static loc:Loc.Instance}}"/>
+                                <Button x:Name="BtnStopAi" Classes="primary" Click="OnStopAi" IsEnabled="False"
+                                        Background="{DynamicResource DangerColor}"
+                                        Content="{Binding [ai.stop], Source={x:Static loc:Loc.Instance}}"/>
+                            </StackPanel>
+                            <ProgressBar x:Name="AiProgress" Minimum="0" Maximum="1" Value="0" Height="4"
+                                         Foreground="{DynamicResource AccentColor}"
+                                         Background="{DynamicResource BorderSubtle}"/>
+                            <TextBlock x:Name="LblAiProgress" Classes="hint" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Results summary -->
+                <StackPanel Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{Binding [qc.section.results], Source={x:Static loc:Loc.Instance}}" Classes="sectionHeader"/>
+                        <Button Grid.Column="1" Classes="subtle" Click="OnClearResults"
+                                Content="{Binding [qc.results.clear], Source={x:Static loc:Loc.Instance}}"
+                                FontSize="11" Padding="8,2" VerticalAlignment="Center"/>
+                    </Grid>
+                    <Border Classes="cardLg">
+                        <StackPanel Spacing="6">
+                            <TextBlock x:Name="LblResults" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextPrimary}"/>
+                            <ItemsControl x:Name="KindList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Classes="hint" Text="{Binding}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Classes="hint" TextWrapping="Wrap"
+                                       Text="{Binding [qc.results.hint], Source={x:Static loc:Loc.Instance}}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:SmartUnrealLocalization.Localization"
+             x:Class="SmartUnrealLocalization.Controls.LightbulbButton">
+
+    <!-- Hover triggers the full ProblemPopover (same flow as status icon
+         and wavy underline) so the user sees the fix diff + Apply button
+         before committing. Tooltip removed because Popup + ToolTip
+         would compete at different delays. -->
+    <Button Classes="cellAction"
+            Click="OnClick"
+            PointerEntered="OnPointerEntered"
+            PointerExited="OnPointerExited">
+        <!-- Bulb glyph drawn as a Path so the colour follows DynamicResource
+             (emoji 💡 would not tint with the Warn brush). 14×14 viewBox
+             scaled into 12×12 via Stretch=Uniform. -->
+        <Path Width="12" Height="12"
+              Stretch="Uniform"
+              Fill="{DynamicResource WarningColor}"
+              Data="M7,1 C4.24,1 2,3.24 2,6 C2,8.05 3.23,9.81 5,10.58 L5,12 L9,12 L9,10.58 C10.77,9.81 12,8.05 12,6 C12,3.24 9.76,1 7,1 Z M5,12.5 L9,12.5 L9,13.2 L5,13.2 Z M5.5,13.5 L8.5,13.5 L8.5,14 L5.5,14 Z"/>
+    </Button>
+</UserControl>

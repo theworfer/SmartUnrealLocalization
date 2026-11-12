@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:SmartUnrealLocalization.Controls"
+        x:Class="SmartUnrealLocalization.Controls.ConfirmDialog"
+        Width="420"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Background="{DynamicResource WindowBackground}"
+        WindowDecorations="None">
+
+    <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+        <DockPanel>
+            <c:DialogTitleBar DockPanel.Dock="Top" x:Name="TitleBar"/>
+
+            <Grid Margin="24,20,24,18" RowDefinitions="Auto,20,Auto">
+                <TextBlock Grid.Row="0"
+                           x:Name="MessageText"
+                           TextWrapping="Wrap"
+                           FontSize="12"
+                           Foreground="{DynamicResource TextPrimary}"/>
+
+                <StackPanel Grid.Row="2" Orientation="Horizontal"
+                            HorizontalAlignment="Right" Spacing="8">
+                    <Button x:Name="BtnCancel" Classes="subtle" Click="OnCancel"/>
+                    <Button x:Name="BtnConfirm" Classes="primary" Click="OnConfirm"/>
+                </StackPanel>
+            </Grid>
+        </DockPanel>
+    </Border>
+</Window>

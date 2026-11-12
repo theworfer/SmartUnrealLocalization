@@ -1,0 +1,31 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:SmartUnrealLocalization.Controls"
+        xmlns:loc="using:SmartUnrealLocalization.Localization"
+        x:Class="SmartUnrealLocalization.Views.AboutWindow"
+        Title="{Binding [about.title], Source={x:Static loc:Loc.Instance}}"
+        Width="420" Height="240"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="{DynamicResource WindowBackground}"
+        WindowDecorations="None">
+
+    <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+        <DockPanel>
+            <c:DialogTitleBar DockPanel.Dock="Top" Title="{Binding [about.title], Source={x:Static loc:Loc.Instance}}"/>
+
+            <StackPanel Margin="32" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Text="Smart Unreal Localization"
+                           FontSize="20" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimary}"/>
+                <TextBlock x:Name="VersionText"
+                           Foreground="{DynamicResource TextMuted}" FontSize="12"/>
+                <TextBlock Text="{Binding [about.tagline], Source={x:Static loc:Loc.Instance}}"
+                           Foreground="{DynamicResource TextDim}" FontSize="12"
+                           TextWrapping="Wrap" Margin="0,4,0,0"/>
+                <Button Classes="subtle" Content="{Binding [common.close], Source={x:Static loc:Loc.Instance}}" Click="OnClose"
+                        HorizontalAlignment="Right" Margin="0,16,0,0"/>
+            </StackPanel>
+        </DockPanel>
+    </Border>
+</Window>

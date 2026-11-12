@@ -1,0 +1,119 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:SmartUnrealLocalization.Localization"
+             xmlns:m="using:SmartUnrealLocalization.Models"
+             xmlns:vm="using:SmartUnrealLocalization.ViewModels"
+             x:Class="SmartUnrealLocalization.Controls.WelcomeView"
+             x:DataType="vm:MainWindowViewModel"
+             Background="{DynamicResource WindowBackground}">
+
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Width="720" MaxWidth="900" Spacing="20">
+            <!-- Hero -->
+            <Border Classes="welcomeHero">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="{Binding [welcome.title], Source={x:Static loc:Loc.Instance}}"
+                               FontSize="28" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextPrimary}"/>
+                    <TextBlock Text="{Binding [welcome.subtitle], Source={x:Static loc:Loc.Instance}}"
+                               FontSize="14"
+                               Foreground="{DynamicResource TextMuted}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Two-column grid: Start | Recent -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="28">
+                <!-- Start column -->
+                <StackPanel Grid.Column="0" Spacing="2">
+                    <TextBlock Text="{Binding [welcome.startHeading], Source={x:Static loc:Loc.Instance}}"
+                               Classes="sectionHeader"
+                               Margin="0,0,0,8"/>
+                    <Button Classes="welcomeAction" Click="OnOpenFile">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <!-- Monochrome vector icons (design I.open/I.folder/I.file, 16px
+                                 from 24-unit space) — emoji rendered colorful regardless of
+                                 Foreground. -->
+                            <Path Width="24" Height="24" RenderTransform="scale(0.667)" Margin="-4"
+                                  Stroke="{DynamicResource TextSecondary}" StrokeThickness="1.6"
+                                  StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"
+                                  VerticalAlignment="Center"
+                                  Data="M5 19h14a1 1 0 0 0 1-1V10H4v8a1 1 0 0 0 1 1z M4 10V6a1 1 0 0 1 1-1h4l2 2h8a1 1 0 0 1 1 1v2"/>
+                            <TextBlock Text="{Binding [welcome.openFile], Source={x:Static loc:Loc.Instance}}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Text="Ctrl+O" FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       VerticalAlignment="Center" Margin="20,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="welcomeAction" Click="OnImportTarget">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Width="24" Height="24" RenderTransform="scale(0.667)" Margin="-4"
+                                  Stroke="{DynamicResource TextSecondary}" StrokeThickness="1.6"
+                                  StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"
+                                  VerticalAlignment="Center"
+                                  Data="M12,3 V13 M8,9 L12,13 L16,9 M4,15 V18 A1,1 0 0 0 5,19 H19 A1,1 0 0 0 20,18 V15"/>
+                            <TextBlock Text="{Binding [welcome.importTarget], Source={x:Static loc:Loc.Instance}}"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="welcomeAction" Click="OnMerge">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Path Width="24" Height="24" RenderTransform="scale(0.667)" Margin="-4"
+                                  Stroke="{DynamicResource TextSecondary}" StrokeThickness="1.6"
+                                  StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"
+                                  VerticalAlignment="Center"
+                                  Data="M4,7 H15 M12,4 L15,7 L12,10 M20,17 H9 M12,14 L9,17 L12,20"/>
+                            <TextBlock Text="{Binding [welcome.merge], Source={x:Static loc:Loc.Instance}}"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <!-- Recent column -->
+                <StackPanel Grid.Column="1" Spacing="2">
+                    <TextBlock Text="{Binding [welcome.recentHeading], Source={x:Static loc:Loc.Instance}}"
+                               Classes="sectionHeader"
+                               Margin="0,0,0,8"/>
+                    <!-- Empty-state hint -->
+                    <TextBlock Classes="hint"
+                               Text="{Binding [welcome.noRecents], Source={x:Static loc:Loc.Instance}}"
+                               Margin="10,8"
+                               IsVisible="{Binding RecentFiles.Count, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=0}"/>
+                    <!-- Recent entries -->
+                    <ItemsControl ItemsSource="{Binding RecentFiles}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="m:RecentFileEntry">
+                                <Button Classes="welcomeAction" Click="OnRecentClicked"
+                                        Tag="{Binding Path}">
+                                    <!-- DockPanel, not a horizontal StackPanel: a StackPanel
+                                         measures its children with unlimited width, so the
+                                         path's ellipsis never had a width to trim to — long
+                                         paths were hard-clipped mid-character instead. -->
+                                    <DockPanel>
+                                        <Path DockPanel.Dock="Left" Width="24" Height="24" RenderTransform="scale(0.667)" Margin="-4,-4,6,-4"
+                                              Stroke="{DynamicResource TextMuted}" StrokeThickness="1.6"
+                                              StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"
+                                              VerticalAlignment="Center"
+                                              Data="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z M14 3v4a1 1 0 0 0 1 1h4"/>
+                                        <StackPanel Spacing="1">
+                                            <TextBlock Text="{Binding Name}"
+                                                       FontSize="13"
+                                                       Foreground="{DynamicResource TextPrimary}"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding Directory}"
+                                                       FontSize="11"
+                                                       FontFamily="Consolas, JetBrains Mono, monospace"
+                                                       Foreground="{DynamicResource TextMuted}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       ToolTip.Tip="{Binding Path}"/>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>

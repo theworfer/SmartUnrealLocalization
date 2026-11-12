@@ -1,0 +1,44 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:SmartUnrealLocalization.Controls"
+        xmlns:loc="using:SmartUnrealLocalization.Localization"
+        x:Class="SmartUnrealLocalization.Controls.ValidationProgressDialog"
+        Title="{Binding [validation.title], Source={x:Static loc:Loc.Instance}}"
+        Width="420" Height="160"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Background="{DynamicResource WindowBackground}"
+        WindowDecorations="None">
+
+    <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+        <DockPanel>
+            <c:DialogTitleBar DockPanel.Dock="Top"
+                              Title="{Binding [validation.title], Source={x:Static loc:Loc.Instance}}"/>
+
+            <Grid Margin="24,20,24,20" RowDefinitions="Auto,12,Auto,16,Auto">
+                <TextBlock Grid.Row="0"
+                           x:Name="ProgressLabel"
+                           Text="0 / 0"
+                           Foreground="{DynamicResource TextPrimary}"
+                           FontSize="12"/>
+
+                <ProgressBar Grid.Row="2"
+                             x:Name="Progress"
+                             Minimum="0"
+                             Maximum="1"
+                             Value="0"
+                             Height="6"
+                             Foreground="{DynamicResource AccentColor}"
+                             Background="{DynamicResource BorderSubtle}"/>
+
+                <Button Grid.Row="4"
+                        Classes="subtle"
+                        x:Name="BtnCancel"
+                        Click="OnCancel"
+                        Content="{Binding [validation.cancel], Source={x:Static loc:Loc.Instance}}"
+                        HorizontalAlignment="Right"/>
+            </Grid>
+        </DockPanel>
+    </Border>
+</Window>

@@ -1,0 +1,38 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:SmartUnrealLocalization.Controls"
+        xmlns:loc="using:SmartUnrealLocalization.Localization"
+        x:Class="SmartUnrealLocalization.Views.LicenseWindow"
+        Title="{Binding [menu.help.license], Source={x:Static loc:Loc.Instance}}"
+        Width="980" Height="620"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="{DynamicResource WindowBackground}"
+        WindowDecorations="None">
+
+    <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+        <DockPanel>
+            <c:DialogTitleBar DockPanel.Dock="Top" Title="{Binding [menu.help.license], Source={x:Static loc:Loc.Instance}}"/>
+
+            <Border DockPanel.Dock="Bottom" Padding="16,10"
+                    BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0">
+                <Button Classes="subtle" HorizontalAlignment="Right" Click="OnClose"
+                        Content="{Binding [common.close], Source={x:Static loc:Loc.Instance}}"/>
+            </Border>
+
+            <TextBlock DockPanel.Dock="Top" Margin="16,12,16,12" TextWrapping="Wrap"
+                       Foreground="{DynamicResource TextDim}" FontSize="12"
+                       Text="{Binding [license.summary], Source={x:Static loc:Loc.Instance}}"/>
+
+            <Grid ColumnDefinitions="340,*" Margin="16,0,16,12">
+                <ListBox x:Name="DocList" Grid.Column="0"
+                         SelectionChanged="OnDocSelected"/>
+                <TextBox x:Name="DocText" Grid.Column="1" Margin="8,0,0,0"
+                         IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap"
+                         FontFamily="Cascadia Mono, Consolas, Courier New" FontSize="12"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+            </Grid>
+        </DockPanel>
+    </Border>
+</Window>

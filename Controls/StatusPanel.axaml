@@ -1,0 +1,203 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:SmartUnrealLocalization.Controls"
+             xmlns:loc="using:SmartUnrealLocalization.Localization"
+             xmlns:vm="using:SmartUnrealLocalization.ViewModels"
+             x:Class="SmartUnrealLocalization.Controls.StatusPanel"
+             x:DataType="vm:MainWindowViewModel"
+             Background="{DynamicResource WindowBackground}">
+
+    <DockPanel>
+        <!-- Panel header -->
+        <Border DockPanel.Dock="Top"
+                Background="{DynamicResource PanelBackground}"
+                BorderBrush="{DynamicResource BorderColor}"
+                BorderThickness="0,0,0,1"
+                Height="32"
+                Padding="12,0">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0" Classes="solHead"
+                           Text="{Binding [status.panel.title], Source={x:Static loc:Loc.Instance}}"
+                           VerticalAlignment="Center"/>
+                <Button Grid.Column="2" Classes="solIcon"
+                        Click="OnClosePanel"
+                        ToolTip.Tip="{Binding [status.panel.close], Source={x:Static loc:Loc.Instance}}">
+                    <TextBlock Text="&#x2190;" FontSize="11"/>
+                </Button>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Padding="20">
+            <StackPanel Spacing="14">
+                <TextBlock Text="{Binding [status.panel.heading], Source={x:Static loc:Loc.Instance}}"
+                           FontSize="18" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimary}"/>
+                <TextBlock Classes="hint"
+                           Text="{Binding [status.panel.subtitle], Source={x:Static loc:Loc.Instance}}"/>
+
+                <!-- Hero: progress ring + current stage -->
+                <Border Classes="cardLg">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                        <Grid Grid.Column="0" Width="120" Height="120">
+                            <c:ProgressRing Percentage="{Binding TranslatedPercentage}"
+                                            StrokeThickness="11"
+                                            StrokeBrush="{Binding TranslatedProgressBrush}"
+                                            TrackBrush="{DynamicResource BorderSubtle}"/>
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="0">
+                                <TextBlock HorizontalAlignment="Center"
+                                           FontSize="26" FontWeight="Bold"
+                                           Foreground="{Binding TranslatedProgressBrush}">
+                                    <Run Text="{Binding TranslatedPercentage}"/><Run Text="%"/>
+                                </TextBlock>
+                                <TextBlock Text="{Binding [status.panel.translatedRing], Source={x:Static loc:Loc.Instance}}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextMuted}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                        <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding [status.panel.currentStage], Source={x:Static loc:Loc.Instance}}"
+                                       Classes="sectionHeader" Margin="0"/>
+                            <Grid ColumnDefinitions="Auto,*">
+                                <Ellipse Grid.Column="0" Width="8" Height="8" VerticalAlignment="Center"
+                                         Margin="0,4,8,0"
+                                         Fill="{Binding TranslatedProgressBrush}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding StatusText}"
+                                           Foreground="{DynamicResource TextPrimary}"
+                                           VerticalAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           ToolTip.Tip="{Binding StatusText}"/>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,8,0,0">
+                                <TextBlock Grid.Column="0"
+                                           FontFamily="Consolas, JetBrains Mono, monospace"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextPrimary}">
+                                    <Run Text="{Binding TranslatedCount}"/><Run Text=" / "/><Run Text="{Binding RowCount}"/>
+                                </TextBlock>
+                                <TextBlock Grid.Column="1"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextMuted}">
+                                    <Run Text="{Binding UntranslatedCount}"/><Run Text=" "/><Run Text="{Binding [status.panel.remaining], Source={x:Static loc:Loc.Instance}}"/>
+                                </TextBlock>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- File stats -->
+                <TextBlock Text="{Binding [status.panel.fileSection], Source={x:Static loc:Loc.Instance}}"
+                           Classes="sectionHeader"/>
+                <Border Classes="cardLg">
+                    <UniformGrid Columns="3" Rows="2">
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="{Binding TranslatedCount}"
+                                       FontSize="18" FontWeight="Bold"
+                                       Foreground="{DynamicResource SuccessColor}"/>
+                            <TextBlock Text="{Binding [status.panel.translated], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="{Binding UntranslatedCount}"
+                                       FontSize="18" FontWeight="Bold"
+                                       Foreground="{DynamicResource TextMuted}"/>
+                            <TextBlock Text="{Binding [status.panel.untranslated], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="{Binding TagReplacedCount}"
+                                       FontSize="18" FontWeight="Bold"
+                                       Foreground="{DynamicResource WarningColor}"/>
+                            <TextBlock Text="{Binding [status.panel.warnings], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="{Binding CellRecoveredCount}"
+                                       FontSize="18" FontWeight="Bold"
+                                       Foreground="{DynamicResource DangerColor}"/>
+                            <TextBlock Text="{Binding [status.panel.errorsLabel], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"/>
+                        </StackPanel>
+                        <StackPanel ToolTip.Tip="{Binding [status.panel.duplicatesTip], Source={x:Static loc:Loc.Instance}}">
+                            <TextBlock Text="{Binding DuplicateSourceCount}"
+                                       FontSize="18" FontWeight="Bold"
+                                       Foreground="{DynamicResource AccentColor}"/>
+                            <TextBlock Text="{Binding [status.panel.duplicates], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"/>
+                        </StackPanel>
+                        <StackPanel ToolTip.Tip="{Binding [status.panel.tmHitsTip], Source={x:Static loc:Loc.Instance}}">
+                            <TextBlock Text="{Binding TmHitsThisSession}"
+                                       FontSize="18" FontWeight="Bold"
+                                       Foreground="{DynamicResource AccentColor}"/>
+                            <TextBlock Text="{Binding [status.panel.tmHits], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"/>
+                        </StackPanel>
+                    </UniformGrid>
+                </Border>
+
+                <!-- App usage stats -->
+                <TextBlock Text="{Binding [status.panel.appSection], Source={x:Static loc:Loc.Instance}}"
+                           Classes="sectionHeader"/>
+                <Border Classes="cardLg">
+                    <UniformGrid Columns="3" Rows="2">
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="{Binding TotalFilesOpened}"
+                                       FontSize="18" FontWeight="Bold"
+                                       Foreground="{DynamicResource TextSecondary}"/>
+                            <TextBlock Text="{Binding [status.panel.filesOpened], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="{Binding TotalRowsTranslated}"
+                                       FontSize="18" FontWeight="Bold"
+                                       Foreground="{DynamicResource SuccessColor}"/>
+                            <TextBlock Text="{Binding [status.panel.rowsTranslated], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="{Binding TotalAiRequests}"
+                                       FontSize="18" FontWeight="Bold"
+                                       Foreground="{DynamicResource AccentColor}"/>
+                            <TextBlock Text="{Binding [status.panel.aiRequests], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="{Binding TotalTmSaves}"
+                                       FontSize="18" FontWeight="Bold"
+                                       Foreground="{DynamicResource AccentColor}"/>
+                            <TextBlock Text="{Binding [status.panel.tmSaves], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="{Binding TotalSessions}"
+                                       FontSize="18" FontWeight="Bold"
+                                       Foreground="{DynamicResource TextSecondary}"/>
+                            <TextBlock Text="{Binding [status.panel.sessions], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"/>
+                        </StackPanel>
+                        <StackPanel ToolTip.Tip="{Binding [status.panel.hoursTip], Source={x:Static loc:Loc.Instance}}">
+                            <TextBlock FontSize="18" FontWeight="Bold"
+                                       Foreground="{DynamicResource TextSecondary}">
+                                <Run Text="{Binding TotalHoursUsed}"/><Run Text=" "/><Run Text="{Binding [status.panel.hoursUnit], Source={x:Static loc:Loc.Instance}}"/>
+                            </TextBlock>
+                            <TextBlock Text="{Binding [status.panel.hours], Source={x:Static loc:Loc.Instance}}"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"/>
+                        </StackPanel>
+                    </UniformGrid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

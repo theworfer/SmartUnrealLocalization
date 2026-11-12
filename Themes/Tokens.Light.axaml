@@ -1,0 +1,104 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ════════ BACKGROUNDS — Latte + cinnamon (light theme) ════════ -->
+    <SolidColorBrush x:Key="WindowBackground"     Color="#F4ECDE"/>
+    <SolidColorBrush x:Key="WindowBackgroundElev" Color="#FBF5E9"/>
+    <SolidColorBrush x:Key="ChromeBackground"     Color="#EADFC7"/>
+    <SolidColorBrush x:Key="ChromeBackground2"    Color="#E1D2B3"/>
+    <SolidColorBrush x:Key="PanelBackground"      Color="#F0E6D2"/>
+    <SolidColorBrush x:Key="PanelBackground2"     Color="#E8DBC0"/>
+    <SolidColorBrush x:Key="ActionBarBackground"  Color="#E8DBC0"/>
+    <SolidColorBrush x:Key="StatusBarBackground"  Color="#A65A2A"/>
+    <SolidColorBrush x:Key="GridHeaderBackground" Color="#E8DBC0"/>
+    <SolidColorBrush x:Key="GridBackground"       Color="#FBF5E9"/>
+    <SolidColorBrush x:Key="GridRowAltBackground" Color="#F6EEDC"/>
+    <SolidColorBrush x:Key="InputBackground"      Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="MenuFlyoutBackground" Color="#FBF5E9"/>
+
+    <!-- ════════ BORDERS ════════ -->
+    <SolidColorBrush x:Key="BorderColor"   Color="#D8C7A4"/>
+    <SolidColorBrush x:Key="BorderSubtle"  Color="#E4D5B5"/>
+    <SolidColorBrush x:Key="BorderStrong"  Color="#B89A6C"/>
+    <!-- Faint header underline — a near-hairline (1px is the floor; this keeps the
+         contrast minimal so it reads as thin as the prototype's line). -->
+    <SolidColorBrush x:Key="GridHeaderUnderline" Color="#E2D3B2"/>
+
+    <!-- ════════ TEXT — espresso family ════════ -->
+    <SolidColorBrush x:Key="TextPrimary"    Color="#3A2A1B"/>
+    <SolidColorBrush x:Key="TextSecondary"  Color="#6E563D"/>
+    <SolidColorBrush x:Key="TextMuted"      Color="#8E7657"/>
+    <SolidColorBrush x:Key="TextDim"        Color="#A89070"/>
+    <SolidColorBrush x:Key="TextOnAccent"   Color="#FFFFFF"/>
+
+    <!-- ════════ ACCENT — cinnamon / terracotta ════════ -->
+    <SolidColorBrush x:Key="AccentColor"   Color="#A65A2A"/>
+    <SolidColorBrush x:Key="AccentHover"   Color="#B86A39"/>
+    <SolidColorBrush x:Key="AccentMuted"   Color="#D9B79A"/>
+    <SolidColorBrush x:Key="AccentSoft"    Color="#1FA65A2A" Opacity="1"/>
+    <SolidColorBrush x:Key="AccentSoft2"   Color="#33A65A2A" Opacity="1"/>
+
+    <!-- ════════ STATES (hover / active / selection) ════════ -->
+    <SolidColorBrush x:Key="HoverBackground"     Color="#785028" Opacity="0.08"/>
+    <SolidColorBrush x:Key="ActiveBackground"    Color="#785028" Opacity="0.14"/>
+
+    <!-- Window caption buttons — see Tokens.Dark.axaml. -->
+    <SolidColorBrush x:Key="CaptionButtonBackground"  Color="#785028" Opacity="0.12"/>
+    <SolidColorBrush x:Key="CaptionButtonBorderBrush" Color="#785028" Opacity="0.20"/>
+    <SolidColorBrush x:Key="CaptionButtonForeground"  Color="#5A4630"/>
+    <x:Double x:Key="CaptionButtonHeight">36</x:Double>
+    <SolidColorBrush x:Key="SelectionBackground" Color="#A65A2A" Opacity="0.16"/>
+    <SolidColorBrush x:Key="SelectionStrong"     Color="#A65A2A" Opacity="0.28"/>
+    <SolidColorBrush x:Key="WindowButtonHover"   Color="#785028" Opacity="0.10"/>
+    <SolidColorBrush x:Key="CloseButtonHover"    Color="#E81123"/>
+
+    <!-- ════════ SEMANTIC ════════ -->
+    <SolidColorBrush x:Key="DangerColor"  Color="#B44A2A"/>
+    <SolidColorBrush x:Key="WarningColor" Color="#B5891D"/>
+    <SolidColorBrush x:Key="SuccessColor" Color="#4F7A3E"/>
+    <SolidColorBrush x:Key="InfoColor"    Color="#2B6CB0"/>
+
+    <!-- Severity marks on the STATUS BAR. Separate from Danger/Warning/Info
+         because the bar here is a saturated orange: those colours measured
+         1.04-1.27:1 against it, i.e. the red "errors" mark was the bar's own
+         colour. On a colour that strong, hue cannot be both distinct and
+         legible, so the marks differ by SHAPE (Glyphs.ErrorRound / Warning /
+         InfoRound, as Visual Studio's status bar does) and only hint at their
+         colour here. ThemeContrastTests holds all three at >= 3:1. -->
+    <SolidColorBrush x:Key="StatusBarErrorMark"   Color="#FFD9CF"/>
+    <SolidColorBrush x:Key="StatusBarWarningMark" Color="#FFEFB8"/>
+    <SolidColorBrush x:Key="StatusBarInfoMark"    Color="#D6E8FF"/>
+
+    <!-- ════════ CODE-EDITOR FEEL ════════ -->
+    <SolidColorBrush x:Key="KeyColor"     Color="#5F3A1C"/>
+
+    <!-- ════════ TAG PILLS (inline {tokens}) ════════ -->
+    <SolidColorBrush x:Key="TagFillColor" Color="#FFE9D2"/>
+    <SolidColorBrush x:Key="TagTextColor" Color="#8F4818"/>
+    <SolidColorBrush x:Key="GridCheckUncheckedBackground" Color="#FBF5E9"/>
+    <SolidColorBrush x:Key="GridCheckUncheckedBorder" Color="#8E7657"/>
+    <SolidColorBrush x:Key="GridCheckCheckedBackground" Color="#A65A2A"/>
+    <SolidColorBrush x:Key="GridCheckCheckedBorder" Color="#A65A2A"/>
+    <SolidColorBrush x:Key="DataGridCellFocusVisualPrimaryBrush" Color="Transparent"/>
+    <SolidColorBrush x:Key="DataGridCellFocusVisualSecondaryBrush" Color="Transparent"/>
+    <SolidColorBrush x:Key="DataGridCurrencyVisualPrimaryBrush" Color="Transparent"/>
+
+    <!-- ════════ INLINE EDITOR HALO ════════ -->
+    <!-- BoxShadow shorthand: offsetX offsetY blur spread color. Mirrors the
+         prototype's `.cell-edit-input` 3 px accent-soft glow. -->
+    <BoxShadows x:Key="EditorGlow">0 0 0 3 #1FA65A2A</BoxShadows>
+
+    <!-- ════════ GRADIENTS ════════ -->
+    <LinearGradientBrush x:Key="TitleBarGradient" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="#EBE0C9"/>
+        <GradientStop Offset="1" Color="#E4D7B9"/>
+    </LinearGradientBrush>
+    <!-- Top stop was #B86A39: white status text measured 4.07:1 on it, under
+         the 4.5:1 WCAG AA asks for text this size. #AD6231 gives 4.60:1 and
+         keeps the gradient's character. -->
+    <LinearGradientBrush x:Key="StatusBarGradient" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="#AD6231"/>
+        <GradientStop Offset="1" Color="#A65A2A"/>
+    </LinearGradientBrush>
+
+</ResourceDictionary>

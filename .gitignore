@@ -1,0 +1,101 @@
+# ──────────────────────────────────────────────────────────────────────
+#  .NET / Avalonia build artifacts
+# ──────────────────────────────────────────────────────────────────────
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+*.dbmdl
+*.jfm
+*.swp
+*.pdb
+*.dll.config
+
+# Build output
+[Bb]uild/
+[Bb]uilds/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Ll]og/
+[Ll]ogs/
+[Pp]ublish/
+
+# NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+**/[Pp]ackages/repositories.config
+*.nuget.props
+*.nuget.targets
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.VisualState.xml
+TestResult.xml
+nunit-*.xml
+*.coverage
+*.coveragexml
+
+# ──────────────────────────────────────────────────────────────────────
+#  IDE / editor
+# ──────────────────────────────────────────────────────────────────────
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.sln.docstates
+*.userosscache
+*.suo
+*.lock.json
+
+# Rider / ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# ──────────────────────────────────────────────────────────────────────
+#  Project-specific runtime artifacts
+# ──────────────────────────────────────────────────────────────────────
+# Legacy per-PID hidden temp dirs (pre-LocresIO); swept on startup for one release
+.temp-SUL-*/
+
+# Local export output (default writes here unless configured otherwise)
+Export/
+
+# Avalonia diagnostic logs
+.avalonia/
+
+# ──────────────────────────────────────────────────────────────────────
+#  OS noise
+# ──────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ──────────────────────────────────────────────────────────────────────
+#  Secrets & local-only files
+# ──────────────────────────────────────────────────────────────────────
+*.local.json
+.env
+.env.*
+!.env.example
+secrets.json
+appsettings.Local.json
+start-enb2.js
+
+# Release output (tools/publish-release.ps1)
+artifacts/

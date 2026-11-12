@@ -1,0 +1,49 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:SmartUnrealLocalization.Controls"
+        x:Class="SmartUnrealLocalization.Controls.MergeReportDialog"
+        Width="560"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Background="{DynamicResource WindowBackground}"
+        WindowDecorations="None">
+
+    <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+        <DockPanel>
+            <c:DialogTitleBar DockPanel.Dock="Top" x:Name="TitleBar"/>
+
+            <Grid Margin="24,20,24,18" RowDefinitions="Auto,10,Auto,16,Auto,20,Auto">
+                <!-- Which rule the match ran under. -->
+                <TextBlock Grid.Row="0" x:Name="ModeText"
+                           TextWrapping="Wrap" FontSize="12" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimary}"/>
+
+                <!-- The counts, one per line, built in code. -->
+                <TextBlock Grid.Row="2" x:Name="CountsText"
+                           TextWrapping="Wrap" FontSize="12" LineHeight="20"
+                           Foreground="{DynamicResource TextPrimary}"/>
+
+                <!-- Shown only when little survived verification, or when bare keys
+                     had to be used — the cases where the user should think twice. -->
+                <Border Grid.Row="4" x:Name="WarnBox"
+                        IsVisible="False"
+                        Background="#33FFCC00"
+                        BorderBrush="{DynamicResource WarningColor}"
+                        BorderThickness="1"
+                        Padding="12,10">
+                    <TextBlock x:Name="WarnText" TextWrapping="Wrap" FontSize="12"
+                               Foreground="{DynamicResource TextPrimary}"/>
+                </Border>
+
+                <StackPanel Grid.Row="6" Orientation="Horizontal"
+                            HorizontalAlignment="Right" Spacing="8">
+                    <Button x:Name="BtnCancel" Classes="subtle" Click="OnCancel"/>
+                    <Button x:Name="BtnKeyOnly" Classes="subtle" Click="OnKeyOnly"/>
+                    <Button x:Name="BtnApply" Classes="primary" Click="OnApply"/>
+                </StackPanel>
+            </Grid>
+        </DockPanel>
+    </Border>
+</Window>

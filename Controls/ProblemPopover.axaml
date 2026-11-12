@@ -1,0 +1,138 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:SmartUnrealLocalization.Localization"
+             xmlns:c="using:SmartUnrealLocalization.Controls"
+             x:Class="SmartUnrealLocalization.Controls.ProblemPopover"
+             IsHitTestVisible="False"
+             Width="0" Height="0"
+             HorizontalAlignment="Left"
+             VerticalAlignment="Top">
+
+    <!-- UserControl is layout-invisible (W=0/H=0) — the Popup is a separate
+         top-level overlay; this host is here just so the Popup has a logical
+         parent for DataContext and theme inheritance. -->
+
+    <Popup x:Name="InnerPopup"
+           IsLightDismissEnabled="False"
+           Placement="Bottom"
+           HorizontalOffset="0"
+           VerticalOffset="6"
+           WindowManagerAddShadowHint="False">
+
+        <Border Width="360"
+                Background="{DynamicResource MenuFlyoutBackground}"
+                BorderBrush="{DynamicResource BorderColor}"
+                BorderThickness="1"
+                CornerRadius="6"
+                BoxShadow="0 4 14 0 #66000000"
+                PointerEntered="OnHoverIn"
+                PointerExited="OnHoverOut">
+
+            <StackPanel Spacing="0">
+
+                <!-- HEADER — severity glyph + title + small uppercase kind tag -->
+                <Grid ColumnDefinitions="Auto,*,Auto"
+                      Margin="12,10,12,8">
+                    <TextBlock Grid.Column="0"
+                               x:Name="SeverityGlyph"
+                               FontSize="16"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0"/>
+                    <TextBlock Grid.Column="1"
+                               x:Name="TitleText"
+                               FontWeight="SemiBold"
+                               FontSize="12.5"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextPrimary}"/>
+                    <TextBlock Grid.Column="2"
+                               x:Name="KindText"
+                               FontSize="10"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextMuted}"
+                               VerticalAlignment="Center"
+                               Margin="6,0,0,0"/>
+                </Grid>
+
+                <!-- BODY — multi-line detail. Wraps to 360 px column width. -->
+                <TextBlock x:Name="DetailText"
+                           Margin="12,0,12,10"
+                           FontSize="11.5"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextSecondary}"
+                           LineHeight="16"/>
+
+                <!-- Optional diff block — old → new value when Fix is present.
+                     IsVisible flipped by code-behind. -->
+                <Border x:Name="DiffPanel"
+                        Margin="12,0,12,10"
+                        Padding="8,6"
+                        Background="{DynamicResource InputBackground}"
+                        BorderBrush="{DynamicResource BorderSubtle}"
+                        BorderThickness="1"
+                        CornerRadius="3"
+                        IsVisible="False">
+                    <!-- The same before/after drawing as the fix review and the QC popup:
+                         changed words highlighted, a changed space shown as a dot. -->
+                    <StackPanel Spacing="2" MaxHeight="180" ClipToBounds="True">
+                        <c:DiffText x:Name="DiffOld" FontSize="11" TextWrapping="Wrap"
+                                    Foreground="{DynamicResource TextMuted}"/>
+                        <c:DiffText x:Name="DiffNew" FontSize="11" TextWrapping="Wrap" ShowAfter="True"
+                                    Foreground="{DynamicResource TextPrimary}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- The same text translated differently: walk its translations and,
+                     if this one is right, give it to every row with that text. -->
+                <StackPanel x:Name="DupPanel" Margin="12,0,12,10" Spacing="6" IsVisible="False">
+                    <Grid ColumnDefinitions="Auto,Auto,*">
+                        <Button Grid.Column="0" Classes="subtle" Click="OnDupPrevious" Padding="8,4"
+                                ToolTip.Tip="{Binding [val.dup.prev], Source={x:Static loc:Loc.Instance}}">
+                            <Path Width="24" Height="24" RenderTransform="scale(0.5)" Margin="-6"
+                                  Stroke="{DynamicResource TextSecondary}" StrokeThickness="2"
+                                  StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"
+                                  Data="M15,5 L8,12 L15,19"/>
+                        </Button>
+                        <Button Grid.Column="1" Classes="subtle" Click="OnDupNext" Padding="8,4" Margin="6,0,0,0"
+                                ToolTip.Tip="{Binding [val.dup.next], Source={x:Static loc:Loc.Instance}}">
+                            <Path Width="24" Height="24" RenderTransform="scale(0.5)" Margin="-6"
+                                  Stroke="{DynamicResource TextSecondary}" StrokeThickness="2"
+                                  StrokeLineCap="Round" StrokeJoin="Round" Fill="Transparent"
+                                  Data="M9,5 L16,12 L9,19"/>
+                        </Button>
+                        <TextBlock Grid.Column="2" x:Name="DupPosition" Margin="10,0,0,0"
+                                   FontSize="11.5" VerticalAlignment="Center" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextSecondary}"/>
+                    </Grid>
+                    <Button Classes="subtle" Click="OnDupUse" HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center">
+                        <TextBlock TextWrapping="Wrap" TextAlignment="Center"
+                                   Text="{Binding [val.dup.use], Source={x:Static loc:Loc.Instance}}"/>
+                    </Button>
+                </StackPanel>
+
+                <!-- FOOTER — Dismiss + (optional) Apply fix -->
+                <Border BorderBrush="{DynamicResource BorderSubtle}"
+                        BorderThickness="0,1,0,0"
+                        Background="Transparent">
+                    <Grid Margin="12,8,12,10" ColumnDefinitions="*,Auto,Auto">
+                        <Button Grid.Column="1"
+                                Classes="subtle"
+                                Click="OnDismiss"
+                                Content="{Binding [popover.dismiss], Source={x:Static loc:Loc.Instance}}"
+                                MinWidth="80"
+                                Margin="0,0,6,0"/>
+                        <Button Grid.Column="2"
+                                Classes="primary"
+                                x:Name="ApplyFixButton"
+                                Click="OnApplyFix"
+                                Content="{Binding [popover.applyFix], Source={x:Static loc:Loc.Instance}}"
+                                MinWidth="100"
+                                IsVisible="False"/>
+                    </Grid>
+                </Border>
+
+            </StackPanel>
+        </Border>
+    </Popup>
+</UserControl>

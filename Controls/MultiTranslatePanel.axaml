@@ -1,0 +1,130 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:SmartUnrealLocalization.Localization"
+             xmlns:c="using:SmartUnrealLocalization.Controls"
+             x:Class="SmartUnrealLocalization.Controls.MultiTranslatePanel"
+             Background="{DynamicResource WindowBackground}">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Header -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource PanelBackground}"
+                BorderBrush="{DynamicResource BorderColor}"
+                BorderThickness="0,0,0,1" Height="32" Padding="12,0">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0" Classes="solHead"
+                           Text="{Binding [mtl.title], Source={x:Static loc:Loc.Instance}}"
+                           VerticalAlignment="Center"/>
+                <Button Grid.Column="2" Classes="solIcon" Click="OnClosePanel"
+                        ToolTip.Tip="{Binding [ai.close], Source={x:Static loc:Loc.Instance}}">
+                    <TextBlock Text="&#x2190;" FontSize="11"/>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Footer: progress + Start/Stop -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource PanelBackground}"
+                BorderBrush="{DynamicResource BorderColor}"
+                BorderThickness="0,1,0,0" Padding="16,10">
+            <StackPanel Spacing="8">
+                <TextBlock x:Name="LblProgress" FontSize="11" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextMuted}"/>
+                <ProgressBar x:Name="Progress" Minimum="0" Maximum="1" Value="0" Height="6"
+                             Foreground="{DynamicResource AccentColor}"
+                             Background="{DynamicResource BorderSubtle}"/>
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                    <Button x:Name="BtnStop" Classes="primary" Background="{DynamicResource DangerColor}"
+                            Click="OnStop" IsEnabled="False"
+                            Content="{Binding [ai.stop], Source={x:Static loc:Loc.Instance}}"/>
+                    <Button x:Name="BtnStart" Classes="primary" Click="OnStart"
+                            Content="{Binding [mtl.start], Source={x:Static loc:Loc.Instance}}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" x:Name="PageScroll">
+            <StackPanel Spacing="14" Margin="20,20,20,28">
+                <TextBlock Text="{Binding [mtl.heading], Source={x:Static loc:Loc.Instance}}"
+                           FontSize="16" FontWeight="Bold"/>
+
+                <!-- Source language -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="{Binding [mtl.sourceLang], Source={x:Static loc:Loc.Instance}}"
+                               FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}"/>
+                    <ComboBox x:Name="CbSource" HorizontalAlignment="Stretch"/>
+                </StackPanel>
+
+                <!-- Output folder -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="{Binding [mtl.outputFolder], Source={x:Static loc:Loc.Instance}}"
+                               FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox x:Name="TbFolder" Classes="form" IsReadOnly="True"
+                                 PlaceholderText="{Binding [mtl.noFolder], Source={x:Static loc:Loc.Instance}}"/>
+                        <Button Grid.Column="1" Classes="subtle" Margin="6,0,0,0" Click="OnBrowseFolder"
+                                Content="{Binding [mtl.browse], Source={x:Static loc:Loc.Instance}}"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Prompt mode -->
+                <CheckBox x:Name="ChkSeparatePrompts"
+                          IsCheckedChanged="OnSeparatePromptsChanged"
+                          Content="{Binding [mtl.separatePrompts], Source={x:Static loc:Loc.Instance}}"/>
+                <StackPanel x:Name="SharedPromptPanel" Spacing="4">
+                    <TextBlock Text="{Binding [mtl.prompt], Source={x:Static loc:Loc.Instance}}"
+                               FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}"/>
+                    <TextBox x:Name="TbSharedPrompt" Classes="form" AcceptsReturn="True"
+                             TextWrapping="Wrap" MinHeight="60"/>
+                </StackPanel>
+
+                <!-- Reviewer comments -->
+                <CheckBox x:Name="ChkSendComments" IsChecked="True"
+                          Content="{Binding [translate.sendComments], Source={x:Static loc:Loc.Instance}}"
+                          ToolTip.Tip="{Binding [translate.sendComments.hint], Source={x:Static loc:Loc.Instance}}"/>
+
+                <!-- Target languages -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="{Binding [mtl.targets], Source={x:Static loc:Loc.Instance}}"
+                               FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox x:Name="TbCustom" Classes="form" KeyDown="OnCustomKeyDown"
+                                 PlaceholderText="{Binding [mtl.customCode], Source={x:Static loc:Loc.Instance}}"/>
+                        <Button Grid.Column="1" Classes="subtle" Margin="6,0,0,0" Click="OnAddCustom" Content="+"/>
+                    </Grid>
+                    <ItemsControl x:Name="LangList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="c:LanguageChoice">
+                                <StackPanel Spacing="2" Margin="0,1">
+                                    <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
+                                    <TextBox Classes="form" Text="{Binding Prompt, Mode=TwoWay}"
+                                             Margin="22,0,0,4" IsVisible="{Binding ShowPrompt}"
+                                             AcceptsReturn="True" TextWrapping="Wrap" MinHeight="44"
+                                             PlaceholderText="{Binding [mtl.perLangPrompt], Source={x:Static loc:Loc.Instance}}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <!-- Results -->
+                <StackPanel x:Name="ResultsPanel" Spacing="4" IsVisible="False">
+                    <TextBlock Text="{Binding [mtl.results], Source={x:Static loc:Loc.Instance}}"
+                               FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}"/>
+                    <ItemsControl x:Name="ResultList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="c:ResultEntry">
+                                <Grid ColumnDefinitions="*,Auto" Margin="0,1">
+                                    <TextBlock Text="{Binding Display}" VerticalAlignment="Center"
+                                               FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                    <Button Grid.Column="1" Classes="subtle" Click="OnOpenResult" Tag="{Binding Path}"
+                                            Content="{Binding [mtl.open], Source={x:Static loc:Loc.Instance}}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

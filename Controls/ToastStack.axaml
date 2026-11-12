@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="using:SmartUnrealLocalization.Controls"
+             xmlns:m="using:SmartUnrealLocalization.Models"
+             xmlns:svc="using:SmartUnrealLocalization.Services"
+             x:Class="SmartUnrealLocalization.Controls.ToastStack">
+
+    <!-- The host Grid is placed by MainWindow in the outer layout column
+         (above the status bar, bottom-right). The ItemsControl renders one
+         Toast per active notification; vertical stack with the newest on
+         the bottom so the eye lands on the latest message first. -->
+    <ItemsControl x:Name="ToastsHost"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Bottom"
+                  Margin="0,0,16,16">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <StackPanel Orientation="Vertical"
+                            VerticalAlignment="Bottom"
+                            Spacing="0"/>
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="m:ToastNotification">
+                <c:Toast/>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+</UserControl>
